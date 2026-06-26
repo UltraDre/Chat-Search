@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>edge searcher · tabbed results · bold yellow · deletable · new format only</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0b1120;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            padding: 1.2rem;
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app {
+            max-width: 1300px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ========= TAB BAR ========= */
+        .tab-bar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.2rem;
+            border-bottom: 1px solid #2d3a5e;
+            padding-bottom: 0;
+        }
+        .tab-btn {
+            background: #0f172a;
+            border: none;
+            padding: 0.65rem 1.6rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 32px 32px 16px 16px;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            letter-spacing: -0.2px;
+            backdrop-filter: blur(2px);
+            border: 1px solid #2d3a5e;
+            border-bottom: none;
+            margin-bottom: -1px;
+        }
+        .tab-btn.active {
+            background: #1e293b;
+            color: #facc15;
+            border-color: #5b6e8c;
+            border-bottom-color: #1e293b;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .tab-btn:first-child {
+            border-top-left-radius: 28px;
+        }
+        .tab-btn:last-child {
+            border-top-right-radius: 28px;
+        }
+        .tab-btn:hover:not(.active) {
+            background: #111827;
+            color: #cbd5e1;
+            border-color: #475569;
+        }
+
+        /* ========= PANELS ========= */
+        .tab-panels {
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .tab-panel {
+            display: none;
+            animation: fadeIn 0.2s ease;
+            flex: 1;
+        }
+        .tab-panel.active-panel {
+            display: flex;
+            flex-direction: column;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        /* ========= SEARCH PANEL CARD ========= */
+        .control-card {
+            background: #1e293b;
+            border-radius: 28px;
+            padding: 1.2rem 1.4rem;
+            margin-bottom: 0;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            border: 1px solid #334155;
+        }
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-bottom: 0.75rem;
+        }
+        h1 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+            background: linear-gradient(135deg, #c084fc, #60a5fa);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .sub {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            border-left: 2px solid #3b82f6;
+            padding-left: 8px;
+            margin-top: 2px;
+        }
+        .stats-badge {
+            background: #0f172a;
+            border-radius: 40px;
+            padding: 4px 12px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #a5f3fc;
+            border: 1px solid #2d3a5e;
+        }
+        .file-zone {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin: 0.8rem 0 0.6rem 0;
+        }
+        .file-label, button {
+            font-size: 0.8rem;
+            font-weight: 500;
+            border-radius: 40px;
+            padding: 6px 14px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: #e2e8f0;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .file-label:hover, button:hover {
+            background: #2d3a5e;
+            border-color: #5b6e8c;
+            transform: translateY(-1px);
+        }
+        button.secondary {
+            background: #0f172a;
+            border-color: #475569;
+        }
+        #fileName {
+            font-size: 0.7rem;
+            background: #0f172a;
+            padding: 4px 12px;
+            border-radius: 40px;
+            color: #cbd5e1;
+        }
+        input {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 40px;
+            padding: 8px 14px;
+            font-size: 0.8rem;
+            color: #f1f5f9;
+            width: 100%;
+            outline: none;
+            transition: 0.15s;
+        }
+        input:focus {
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+        }
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin: 0.8rem 0 0.2rem;
+        }
+        .field-group {
+            flex: 1;
+            min-width: 130px;
+        }
+        label {
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: #9ca3af;
+            margin-bottom: 4px;
+            display: block;
+        }
+        .format-example {
+            background: #0f172a;
+            border-radius: 18px;
+            padding: 8px 12px;
+            font-size: 0.7rem;
+            margin-top: 12px;
+            border-left: 3px solid #3b82f6;
+            font-family: monospace;
+            color: #cbd5e6;
+        }
+        code {
+            background: #00000044;
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+        }
+
+        /* ========= RESULTS TAB (raw, full height) ========= */
+        .results-raw {
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        .message-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 0.2rem 0.2rem 0.2rem 0;
+            max-height: none;
+        }
+        .convo-item {
+            background: #0f172a;
+            border: 1px solid #2d3a5e;
+            border-radius: 20px;
+            padding: 10px 14px;
+            transition: 0.05s linear;
+            position: relative;
+        }
+        .convo-item:hover {
+            background: #1e2a3a;
+            border-color: #5b6e8c;
+        }
+        .msg-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: baseline;
+            margin-bottom: 6px;
+            font-size: 0.7rem;
+        }
+        .msg-datetime {
+            font-family: 'JetBrains Mono', monospace;
+            background: #00000033;
+            padding: 2px 10px;
+            border-radius: 30px;
+            font-weight: 500;
+            color: #7dd3fc;
+        }
+        .msg-speaker {
+            font-weight: 700;
+            background: #111827;
+            padding: 2px 10px;
+            border-radius: 30px;
+            color: #facc15;
+            font-size: 0.7rem;
+        }
+        .msg-text {
+            font-size: 0.8rem;
+            line-height: 1.45;
+            color: #e2e8f0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            padding-right: 28px;
+        }
+        .msg-text mark {
+            background: none;
+            color: #facc15;
+            font-weight: 700;
+            padding: 0;
+            border-radius: 0;
+            box-shadow: none;
+        }
+        .delete-msg-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            color: #94a3b8;
+            padding: 4px;
+            border-radius: 40px;
+            width: auto;
+            line-height: 1;
+            transition: 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .delete-msg-btn:hover {
+            background: #4b5563;
+            color: #f87171;
+            transform: scale(1.05);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            background: #0f172a;
+            border-radius: 24px;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            border: 1px solid #2d3a5e;
+            margin: 0.2rem 0;
+        }
+        .result-count-badge {
+            background: #0f172a;
+            border-radius: 40px;
+            padding: 4px 14px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #a5f3fc;
+            display: inline-block;
+            margin-bottom: 12px;
+            border: 1px solid #334155;
+            align-self: flex-start;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.6rem;
+            color: #5b6e8c;
+            margin-top: 1.8rem;
+            border-top: 1px dashed #1e293b;
+            padding-top: 1rem;
+            transition: opacity 0.2s;
+        }
+        footer.hide-footer {
+            display: none;
+        }
+
+        @media (max-width: 640px) {
+            body { padding: 0.8rem; }
+            .control-card { padding: 1rem; }
+            .flex-row { flex-direction: column; gap: 0.6rem; }
+            .msg-text { padding-right: 24px; }
+            .delete-msg-btn { top: 8px; right: 8px; font-size: 0.9rem; }
+            .tab-btn { padding: 0.5rem 1rem; font-size: 0.75rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="tab-bar">
+        <button class="tab-btn active" data-tab="search">🔎 Search & Filters</button>
+        <button class="tab-btn" data-tab="results">📋 Search Results</button>
+    </div>
+
+    <div class="tab-panels">
+        <!-- TAB 1: SEARCH / CONTROL PANEL -->
+        <div class="tab-panel active-panel" id="searchPanel">
+            <div class="control-card">
+                <div class="flex-between">
+                    <div>
+                        <h1>⌕ conversation searcher</h1>
+                        <div class="sub">upload · filter by speaker(s) + date range (dd/mm/yyyy) · <span style="color:#facc15; font-weight:600;">bold yellow matches</span></div>
+                    </div>
+                    <div class="stats-badge" id="parseStats">📄 no file</div>
+                </div>
+
+                <div class="file-zone">
+                    <input type="file" id="fileInput" accept=".txt, .text/plain" style="display: none;">
+                    <button class="file-label" id="uploadBtn">📁 choose .txt</button>
+                    <span id="fileName">no file selected</span>
+                    <button id="clearFileBtn" class="secondary" style="padding: 5px 12px;">🗑 clear</button>
+                </div>
+
+                <div class="flex-row">
+                    <div class="field-group">
+                        <label>speaker 1 *</label>
+                        <input type="text" id="name1" placeholder="e.g., Samuel EA" autocomplete="off">
+                    </div>
+                    <div class="field-group">
+                        <label>speaker 2 (optional)</label>
+                        <input type="text" id="name2" placeholder="e.g., Olarick" autocomplete="off">
+                    </div>
+                    <div class="field-group">
+                        <label>from (dd/mm/yyyy)</label>
+                        <input type="text" id="startDate" placeholder="15/07/2025" autocomplete="off">
+                    </div>
+                    <div class="field-group">
+                        <label>to (dd/mm/yyyy)</label>
+                        <input type="text" id="endDate" placeholder="16/07/2025" autocomplete="off">
+                    </div>
+                    <div class="field-group" style="flex: 0.4; min-width: 90px;">
+                        <label>🔍</label>
+                        <button id="searchBtn" style="width:100%">search</button>
+                    </div>
+                </div>
+
+                <div class="format-example">
+                    🧩 <strong>required format (exact):</strong> <code>[dd/mm/yyyy, HH:MM:SS] Speaker: message</code><br>
+                    (no tilde, no extra characters – just a space after the closing bracket)<br>
+                    <span style="color:#a5f3fc;">↳ multi‑line:</span> any line without timestamp is attached to previous message<br>
+                    example: <code>[15/07/2025, 23:11:51] Samuel EA: Something that I deal with very well.</code><br>
+                    <span style="color:#facc15; font-weight:500;">✨ bold yellow matches · 🗑️ delete any message from current results</span><br>
+                    <span style="color:#7dd3fc;">📌 Results appear in "Search Results" tab → deletable & highlighted, no footer for full vertical space</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: RESULTS PANEL (raw, no card, footer hidden) -->
+        <div class="tab-panel" id="resultsPanel">
+            <div class="results-raw">
+                <div id="resultsContainer" class="message-list">
+                    <div class="empty-state">✨ perform a search in the "Search & Filters" tab → results will appear here.<br>bold yellow highlights · 🗑️ delete any message from current results<br><span style="color:#a5f3fc;">📐 Footer hidden on this tab → results use full vertical space.</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer id="mainFooter">[dd/mm/yyyy, HH:MM:SS] format · 24h time with seconds · continuation lines merged · speaker names = bold yellow · delete per message · tabbed results</footer>
+</div>
+
+<script>
+    // ---------- GLOBALS ----------
+    let parsedMessages = [];       
+    let fileLoaded = false;
+    let currentDisplayedMessages = [];   
+    let currentHighlightNames = [];       
+
+    // DOM elements
+    const fileInput = document.getElementById('fileInput');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const clearFileBtn = document.getElementById('clearFileBtn');
+    const fileNameSpan = document.getElementById('fileName');
+    const parseStatsSpan = document.getElementById('parseStats');
+    const name1Input = document.getElementById('name1');
+    const name2Input = document.getElementById('name2');
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    const searchBtn = document.getElementById('searchBtn');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const mainFooter = document.getElementById('mainFooter');
+
+    // Tab management
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('.tab-panel');
+    
+    function switchTab(tabId) {
+        panels.forEach(panel => panel.classList.remove('active-panel'));
+        tabBtns.forEach(btn => btn.classList.remove('active'));
+        const activePanel = document.getElementById(`${tabId}Panel`);
+        if (activePanel) activePanel.classList.add('active-panel');
+        const activeBtn = Array.from(tabBtns).find(btn => btn.dataset.tab === tabId);
+        if (activeBtn) activeBtn.classList.add('active');
+        
+        if (tabId === 'results') {
+            if (mainFooter) mainFooter.classList.add('hide-footer');
+        } else {
+            if (mainFooter) mainFooter.classList.remove('hide-footer');
+        }
+    }
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabName = btn.dataset.tab;
+            if (tabName === 'search') switchTab('search');
+            else if (tabName === 'results') switchTab('results');
+        });
+    });
+
+    if (mainFooter) mainFooter.classList.remove('hide-footer');
+
+    function escapeRegex(str) {
+        return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function highlightText(text, highlightNames) {
+        if (!highlightNames || highlightNames.length === 0) {
+            return text.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            }).replace(/\n/g, '<br>');
+        }
+        
+        let escaped = text.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+        
+        const uniqueNames = [];
+        const lowerSet = new Set();
+        for (const name of highlightNames) {
+            const lower = name.toLowerCase();
+            if (!lowerSet.has(lower)) {
+                lowerSet.add(lower);
+                uniqueNames.push(name);
+            }
+        }
+        uniqueNames.sort((a,b) => b.length - a.length);
+        for (const name of uniqueNames) {
+            if (name.length === 0) continue;
+            const regex = new RegExp(`(${escapeRegex(name)})`, 'gi');
+            escaped = escaped.replace(regex, `<mark>$1</mark>`);
+        }
+        return escaped.replace(/\n/g, '<br>');
+    }
+
+    function parseDateToMidnightUTC(dateStr) {
+        if (!dateStr || typeof dateStr !== 'string') return null;
+        const trimmed = dateStr.trim();
+        const regex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+        const match = trimmed.match(regex);
+        if (!match) return null;
+        let day = parseInt(match[1], 10);
+        let month = parseInt(match[2], 10);
+        let year = parseInt(match[3], 10);
+        if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+        const dateObj = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+        return isNaN(dateObj.getTime()) ? null : dateObj.getTime();
+    }
+
+    // Normalise uncommon Unicode whitespace (including narrow no-break space) to normal space
+    function normaliseWhitespace(line) {
+        return line.replace(/[\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]/g, ' ');
+    }
+
+    // Strict parser: only accepts format "[dd/mm/yyyy, HH:MM:SS] Speaker: message" (no tilde)
+    function parseMainMessageLine(line) {
+        let cleaned = normaliseWhitespace(line);
+        // Regex: [date, time] space Speaker: message
+        const regex = /^\[(\d{1,2}\/\d{1,2}\/\d{4}),\s+(\d{1,2}:\d{2}:\d{2})\]\s+([^:]+):\s*(.*)$/;
+        const match = cleaned.match(regex);
+        if (!match) return null;
+
+        const dateStr = match[1];
+        const timeStr = match[2];
+        let speakerRaw = match[3].trim();
+        const firstLineMsg = match[4].trim();
+        if (!speakerRaw) return null;
+
+        const timeRegex = /^(\d{1,2}):(\d{2}):(\d{2})$/;
+        const timeMatch = timeStr.match(timeRegex);
+        if (!timeMatch) return null;
+        let hours = parseInt(timeMatch[1], 10);
+        let minutes = parseInt(timeMatch[2], 10);
+        let seconds = parseInt(timeMatch[3], 10);
+        if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59 || seconds < 0 || seconds > 59) return null;
+
+        const dateParts = dateStr.split('/');
+        if (dateParts.length !== 3) return null;
+        let day = parseInt(dateParts[0], 10);
+        let month = parseInt(dateParts[1], 10);
+        let year = parseInt(dateParts[2], 10);
+        if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+        if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+
+        const dayMidnightUTC = Date.UTC(year, month - 1, day, 0, 0, 0, 0);
+        if (isNaN(dayMidnightUTC)) return null;
+        const fullDateObj = new Date(Date.UTC(year, month - 1, day, hours, minutes, seconds, 0));
+        if (isNaN(fullDateObj.getTime())) return null;
+
+        return {
+            rawDate: dateStr,
+            rawTime: timeStr,
+            speaker: speakerRaw,
+            message: firstLineMsg,
+            speakerLower: speakerRaw.toLowerCase(),
+            dayTimestamp: dayMidnightUTC,
+            fullTimestamp: fullDateObj.getTime(),
+            continuationLines: []
+        };
+    }
+
+    function parseFileWithContinuations(text) {
+        const lines = text.split(/\r?\n/);
+        const messages = [];
+        let currentMessage = null;
+        let skippedLines = 0;
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const mainMatch = parseMainMessageLine(line);
+            if (mainMatch) {
+                if (currentMessage) messages.push(currentMessage);
+                currentMessage = mainMatch;
+                currentMessage.continuationLines = [];
+            } else {
+                if (currentMessage && line.trim() !== "") {
+                    currentMessage.continuationLines.push(line);
+                } else if (!currentMessage && line.trim() !== "") {
+                    skippedLines++;
+                } else if (currentMessage && line === "") {
+                    currentMessage.continuationLines.push(line);
+                }
+            }
+        }
+        if (currentMessage) messages.push(currentMessage);
+
+        const finalMessages = [];
+        for (const msg of messages) {
+            let fullText = msg.message;
+            if (msg.continuationLines.length > 0) {
+                fullText += "\n" + msg.continuationLines.join("\n");
+            }
+            finalMessages.push({
+                rawDate: msg.rawDate,
+                rawTime: msg.rawTime,
+                speaker: msg.speaker,
+                speakerLower: msg.speakerLower,
+                message: fullText,
+                dayTimestamp: msg.dayTimestamp,
+                fullTimestamp: msg.fullTimestamp,
+            });
+        }
+        return { messages: finalMessages, skippedLines };
+    }
+
+    function updateStatsDisplay(count, skipped = 0) {
+        if (count === 0 && !fileLoaded) parseStatsSpan.innerHTML = `📄 no file`;
+        else if (count === 0 && fileLoaded) parseStatsSpan.innerHTML = `⚠️ ${skipped} invalid lines`;
+        else parseStatsSpan.innerHTML = `✅ ${count} msgs${skipped ? ` · +${skipped} orphan` : ''}`;
+    }
+
+    function resetSearchResults() {
+        currentDisplayedMessages = [];
+        currentHighlightNames = [];
+        if (resultsContainer) {
+            if (fileLoaded && parsedMessages.length > 0) {
+                resultsContainer.innerHTML = `<div class="empty-state">🔎 File loaded. Use "Search & Filters" tab → enter speaker names + date range → search.<br>Results will appear here with bold yellow highlights and delete icons.<br>📐 Footer hidden on this tab → full vertical space.</div>`;
+            } else if (fileLoaded && parsedMessages.length === 0) {
+                resultsContainer.innerHTML = `<div class="empty-state">⚠️ No valid messages in current file.<br>Check format: <code>[dd/mm/yyyy, HH:MM:SS] Speaker: message</code></div>`;
+            } else {
+                resultsContainer.innerHTML = `<div class="empty-state">📂 Upload a chat log first.<br>Then search to see deletable, highlighted results in this tab.<br>Footer is hidden on results tab for maximum space.</div>`;
+            }
+        }
+    }
+
+    function loadFile(file) {
+        if (!file) { resetFileState(); return; }
+        fileNameSpan.textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const content = e.target.result;
+            const { messages, skippedLines } = parseFileWithContinuations(content);
+            parsedMessages = messages;
+            fileLoaded = true;
+            updateStatsDisplay(parsedMessages.length, skippedLines);
+            currentDisplayedMessages = [];
+            currentHighlightNames = [];
+            resetSearchResults();
+            if (parsedMessages.length === 0) {
+                resultsContainer.innerHTML = `<div class="empty-state">⚠️ No valid messages found.<br>Use: <code>[15/07/2025, 23:11:51] Samuel EA: message</code><br>Continuation lines are merged automatically.</div>`;
+            } else {
+                if (resultsContainer) {
+                    resultsContainer.innerHTML = `<div class="empty-state">📄 File loaded (${parsedMessages.length} messages).<br>Go to Search tab, enter names + date range → click Search.<br>Results shown here with 🗑️ delete + bold yellow highlights. No footer on this tab.</div>`;
+                }
+            }
+        };
+        reader.onerror = () => { alert("file read error"); resetFileState(); };
+        reader.readAsText(file, "UTF-8");
+    }
+
+    function resetFileState() {
+        parsedMessages = [];
+        fileLoaded = false;
+        fileNameSpan.textContent = "no file selected";
+        updateStatsDisplay(0, 0);
+        fileInput.value = "";
+        currentDisplayedMessages = [];
+        currentHighlightNames = [];
+        resetSearchResults();
+        resultsContainer.innerHTML = `<div class="empty-state">📂 upload .txt → required format: <code>[dd/mm/yyyy, HH:MM:SS] Speaker: message</code><br>multi‑line supported · bold yellow highlights · deletable results (Results tab)<br>Footer hidden for full-height view.</div>`;
+    }
+
+    function renderResults(messages, highlightNames) {
+        if (!messages.length) {
+            if (fileLoaded && parsedMessages.length) {
+                resultsContainer.innerHTML = `<div class="empty-state">✨ No messages match current filters. Adjust speaker names or date range.<br>🗑️ Deleted messages only removed from this view (source file untouched).</div>`;
+            } else if (!fileLoaded) {
+                resultsContainer.innerHTML = `<div class="empty-state">📂 Upload a chat log to start. Then search → results appear here.<br>Footer hidden on this tab → results use full height.</div>`;
+            } else if (fileLoaded && parsedMessages.length === 0) {
+                resultsContainer.innerHTML = `<div class="empty-state">⚠️ No valid messages in file. Check format.</div>`;
+            } else {
+                resultsContainer.innerHTML = `<div class="empty-state">✨ No results. Try different search criteria.</div>`;
+            }
+            return;
+        }
+        
+        const fragment = document.createDocumentFragment();
+        const countSpan = document.createElement('div');
+        countSpan.className = 'result-count-badge';
+        countSpan.textContent = `${messages.length} message${messages.length !== 1 ? 's' : ''}`;
+        fragment.appendChild(countSpan);
+        
+        for (let idx = 0; idx < messages.length; idx++) {
+            const msg = messages[idx];
+            const div = document.createElement('div');
+            div.className = 'convo-item';
+            div.setAttribute('data-msg-idx', idx);
+            
+            const meta = document.createElement('div');
+            meta.className = 'msg-meta';
+            const dtSpan = document.createElement('span');
+            dtSpan.className = 'msg-datetime';
+            dtSpan.textContent = `${msg.rawDate} ${msg.rawTime}`;
+            const spSpan = document.createElement('span');
+            spSpan.className = 'msg-speaker';
+            spSpan.textContent = msg.speaker;
+            meta.appendChild(dtSpan);
+            meta.appendChild(spSpan);
+            
+            const textDiv = document.createElement('div');
+            textDiv.className = 'msg-text';
+            const highlightedMsg = highlightText(msg.message, highlightNames);
+            textDiv.innerHTML = highlightedMsg;
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-msg-btn';
+            deleteBtn.innerHTML = '🗑️';
+            deleteBtn.title = 'Remove this message from current results';
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const newDisplayed = currentDisplayedMessages.filter(m => m !== msg);
+                currentDisplayedMessages = newDisplayed;
+                renderResults(currentDisplayedMessages, currentHighlightNames);
+            });
+            
+            div.appendChild(meta);
+            div.appendChild(textDiv);
+            div.appendChild(deleteBtn);
+            fragment.appendChild(div);
+        }
+        resultsContainer.innerHTML = '';
+        resultsContainer.appendChild(fragment);
+    }
+
+    function performSearch() {
+        if (!fileLoaded || parsedMessages.length === 0) {
+            resultsContainer.innerHTML = `<div class="empty-state">⚠️ please upload a valid chat log first.<br>format: <code>[15/07/2025, 23:11:51] Samuel EA: text</code></div>`;
+            switchTab('results');
+            return;
+        }
+
+        let name1Raw = name1Input.value.trim();
+        if (name1Raw === "") {
+            resultsContainer.innerHTML = `<div class="empty-state">❌ enter SPEAKER 1 (required)</div>`;
+            switchTab('results');
+            return;
+        }
+
+        const name2Raw = name2Input.value.trim();
+        const startDateRaw = startDateInput.value.trim();
+        const endDateRaw = endDateInput.value.trim();
+
+        let startDayMs = null, endDayMs = null;
+        if (startDateRaw !== "") {
+            startDayMs = parseDateToMidnightUTC(startDateRaw);
+            if (startDayMs === null) {
+                resultsContainer.innerHTML = `<div class="empty-state">❌ invalid FROM date → use dd/mm/yyyy (e.g., 15/07/2025)</div>`;
+                switchTab('results');
+                return;
+            }
+        }
+        if (endDateRaw !== "") {
+            endDayMs = parseDateToMidnightUTC(endDateRaw);
+            if (endDayMs === null) {
+                resultsContainer.innerHTML = `<div class="empty-state">❌ invalid TO date → use dd/mm/yyyy (e.g., 16/07/2025)</div>`;
+                switchTab('results');
+                return;
+            }
+        }
+        if (startDayMs !== null && endDayMs !== null && startDayMs > endDayMs) {
+            resultsContainer.innerHTML = `<div class="empty-state">⛔ from date cannot be after to date</div>`;
+            switchTab('results');
+            return;
+        }
+
+        const name1Lower = name1Raw.toLowerCase();
+        const name2Lower = name2Raw.toLowerCase();
+
+        let filtered = parsedMessages.filter(msg => {
+            const sp = msg.speakerLower;
+            if (name2Raw === "") return sp === name1Lower;
+            return sp === name1Lower || sp === name2Lower;
+        });
+
+        if (startDayMs !== null || endDayMs !== null) {
+            filtered = filtered.filter(msg => {
+                const d = msg.dayTimestamp;
+                if (startDayMs !== null && d < startDayMs) return false;
+                if (endDayMs !== null && d > endDayMs) return false;
+                return true;
+            });
+        }
+
+        filtered.sort((a,b) => a.fullTimestamp - b.fullTimestamp);
+        
+        const highlightSet = new Set();
+        if (name1Raw) highlightSet.add(name1Raw);
+        if (name2Raw) highlightSet.add(name2Raw);
+        const highlightNames = Array.from(highlightSet);
+        
+        currentDisplayedMessages = filtered;
+        currentHighlightNames = highlightNames;
+        renderResults(currentDisplayedMessages, currentHighlightNames);
+        switchTab('results');
+    }
+
+    function clearFileAndReset() {
+        resetFileState();
+        fileInput.value = '';
+        name1Input.value = '';
+        name2Input.value = '';
+        startDateInput.value = '';
+        endDateInput.value = '';
+        resultsContainer.innerHTML = `<div class="empty-state">📂 file cleared. upload new log.</div>`;
+        parseStatsSpan.innerHTML = `📄 no file`;
+        fileNameSpan.textContent = "no file selected";
+        fileLoaded = false;
+        parsedMessages = [];
+        currentDisplayedMessages = [];
+        currentHighlightNames = [];
+        switchTab('search');
+    }
+
+    uploadBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) loadFile(file);
+        else resetFileState();
+    });
+    clearFileBtn.addEventListener('click', clearFileAndReset);
+    searchBtn.addEventListener('click', performSearch);
+
+    [name1Input, name2Input, startDateInput, endDateInput].forEach(field => {
+        field.addEventListener('keypress', (e) => { if (e.key === 'Enter') { e.preventDefault(); performSearch(); } });
+    });
+</script>
+</body>
+</html>
