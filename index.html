@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>edge searcher · tabbed results · bold yellow · deletable · new format only</title>
+    <title>edge searcher · tabbed results · bold yellow · deletable · dual format</title>
     <style>
         * {
             margin: 0;
@@ -372,7 +372,7 @@
                 <div class="flex-between">
                     <div>
                         <h1>⌕ conversation searcher</h1>
-                        <div class="sub">upload · filter by speaker(s) + date range (dd/mm/yyyy) · <span style="color:#facc15; font-weight:600;">bold yellow matches</span></div>
+                        <div class="sub">upload · filter by speaker(s) + date range · <span style="color:#facc15; font-weight:600;">bold yellow matches</span></div>
                     </div>
                     <div class="stats-badge" id="parseStats">📄 no file</div>
                 </div>
@@ -391,15 +391,15 @@
                     </div>
                     <div class="field-group">
                         <label>speaker 2 (optional)</label>
-                        <input type="text" id="name2" placeholder="e.g., Olarick" autocomplete="off">
+                        <input type="text" id="name2" placeholder="e.g., Warriblood EA" autocomplete="off">
                     </div>
                     <div class="field-group">
-                        <label>from (dd/mm/yyyy)</label>
-                        <input type="text" id="startDate" placeholder="15/07/2025" autocomplete="off">
+                        <label>from</label>
+                        <input type="text" id="startDate" placeholder="dd/mm/yyyy or m/d/yy" autocomplete="off">
                     </div>
                     <div class="field-group">
-                        <label>to (dd/mm/yyyy)</label>
-                        <input type="text" id="endDate" placeholder="16/07/2025" autocomplete="off">
+                        <label>to</label>
+                        <input type="text" id="endDate" placeholder="dd/mm/yyyy or m/d/yy" autocomplete="off">
                     </div>
                     <div class="field-group" style="flex: 0.4; min-width: 90px;">
                         <label>🔍</label>
@@ -408,10 +408,13 @@
                 </div>
 
                 <div class="format-example">
-                    🧩 <strong>required format (exact):</strong> <code>[dd/mm/yyyy, HH:MM:SS] Speaker: message</code><br>
-                    (no tilde, no extra characters – just a space after the closing bracket)<br>
+                    <strong>Supports two formats:</strong><br>
+                    🆕 <code>[dd/mm/yyyy, HH:MM:SS] Speaker: message</code><br>
+                    📅 <code>m/d/yy, HH:MM - Speaker: message</code><br>
                     <span style="color:#a5f3fc;">↳ multi‑line:</span> any line without timestamp is attached to previous message<br>
-                    example: <code>[15/07/2025, 23:11:51] Samuel EA: Something that I deal with very well.</code><br>
+                    examples:<br>
+                    <code>[15/07/2025, 23:11:51] Samuel EA: Something that I deal with very well.</code><br>
+                    <code>6/6/26, 22:16 - Warriblood EA: Waiting for you</code><br>
                     <span style="color:#facc15; font-weight:500;">✨ bold yellow matches · 🗑️ delete any message from current results</span><br>
                     <span style="color:#7dd3fc;">📌 Results appear in "Search Results" tab → deletable & highlighted, no footer for full vertical space</span>
                 </div>
@@ -428,7 +431,7 @@
         </div>
     </div>
     
-    <footer id="mainFooter">[dd/mm/yyyy, HH:MM:SS] format · 24h time with seconds · continuation lines merged · speaker names = bold yellow · delete per message · tabbed results</footer>
+    <footer id="mainFooter">dual format: [dd/mm/yyyy, HH:MM:SS] or m/d/yy, HH:MM · continuation lines merged · speaker names = bold yellow · delete per message · tabbed results</footer>
 </div>
 
 <script>
@@ -520,7 +523,9 @@
         return escaped.replace(/\n/g, '<br>');
     }
 
-    function parseDateToMidnightUTC(dateStr) {
+    // ---------- DATE PARSERS ----------
+    // Parse dd/mm/yyyy format (for new format)
+    function parseDateDMY(dateStr) {
         if (!dateStr || typeof dateStr !== 'string') return null;
         const trimmed = dateStr.trim();
         const regex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
@@ -534,15 +539,38 @@
         return isNaN(dateObj.getTime()) ? null : dateObj.getTime();
     }
 
-    // Normalise uncommon Unicode whitespace (including narrow no-break space) to normal space
+    // Parse m/d/yy format (for legacy format)
+    function parseDateMDY(dateStr) {
+        if (!dateStr || typeof dateStr !== 'string') return null;
+        const trimmed = dateStr.trim();
+        const regex = /^(\d{1,2})\/(\d{1,2})\/(\d{2})$/;
+        const match = trimmed.match(regex);
+        if (!match) return null;
+        let month = parseInt(match[1], 10);
+        let day = parseInt(match[2], 10);
+        let yearShort = parseInt(match[3], 10);
+        if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+        let fullYear = 2000 + yearShort;
+        const dateObj = new Date(Date.UTC(fullYear, month - 1, day, 0, 0, 0, 0));
+        return isNaN(dateObj.getTime()) ? null : dateObj.getTime();
+    }
+
+    // Universal date parser: try DMY first, then MDY
+    function parseDateUniversal(dateStr) {
+        if (!dateStr || typeof dateStr !== 'string') return null;
+        let result = parseDateDMY(dateStr);
+        if (result !== null) return result;
+        return parseDateMDY(dateStr);
+    }
+
+    // Normalise uncommon Unicode whitespace
     function normaliseWhitespace(line) {
         return line.replace(/[\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]/g, ' ');
     }
 
-    // Strict parser: only accepts format "[dd/mm/yyyy, HH:MM:SS] Speaker: message" (no tilde)
-    function parseMainMessageLine(line) {
+    // ---------- FORMAT 1: [dd/mm/yyyy, HH:MM:SS] Speaker: message ----------
+    function parseNewFormat(line) {
         let cleaned = normaliseWhitespace(line);
-        // Regex: [date, time] space Speaker: message
         const regex = /^\[(\d{1,2}\/\d{1,2}\/\d{4}),\s+(\d{1,2}:\d{2}:\d{2})\]\s+([^:]+):\s*(.*)$/;
         const match = cleaned.match(regex);
         if (!match) return null;
@@ -582,8 +610,63 @@
             speakerLower: speakerRaw.toLowerCase(),
             dayTimestamp: dayMidnightUTC,
             fullTimestamp: fullDateObj.getTime(),
-            continuationLines: []
+            displayDate: dateStr,
+            displayTime: timeStr
         };
+    }
+
+    // ---------- FORMAT 2: m/d/yy, HH:MM - Speaker: message ----------
+    function parseLegacyFormat(line) {
+        let cleaned = normaliseWhitespace(line);
+        const regex = /^(\d{1,2}\/\d{1,2}\/\d{2}),\s+(\d{1,2}:\d{2})\s+-\s+([^:]+):\s*(.*)$/;
+        const match = cleaned.match(regex);
+        if (!match) return null;
+
+        const dateStr = match[1];
+        const timeStr = match[2];
+        let speakerRaw = match[3].trim();
+        const firstLineMsg = match[4].trim();
+        if (!speakerRaw) return null;
+
+        const timeRegex = /^(\d{1,2}):(\d{2})$/;
+        const timeMatch = timeStr.match(timeRegex);
+        if (!timeMatch) return null;
+        let hours = parseInt(timeMatch[1], 10);
+        let minutes = parseInt(timeMatch[2], 10);
+        if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
+
+        const dateParts = dateStr.split('/');
+        if (dateParts.length !== 3) return null;
+        let month = parseInt(dateParts[0], 10);
+        let day = parseInt(dateParts[1], 10);
+        let yy = parseInt(dateParts[2], 10);
+        if (isNaN(month) || isNaN(day) || isNaN(yy)) return null;
+        if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+        let fullYear = 2000 + yy;
+
+        const dayMidnightUTC = Date.UTC(fullYear, month - 1, day, 0, 0, 0, 0);
+        if (isNaN(dayMidnightUTC)) return null;
+        const fullDateObj = new Date(Date.UTC(fullYear, month - 1, day, hours, minutes, 0, 0));
+        if (isNaN(fullDateObj.getTime())) return null;
+
+        return {
+            rawDate: dateStr,
+            rawTime: timeStr,
+            speaker: speakerRaw,
+            message: firstLineMsg,
+            speakerLower: speakerRaw.toLowerCase(),
+            dayTimestamp: dayMidnightUTC,
+            fullTimestamp: fullDateObj.getTime(),
+            displayDate: dateStr,
+            displayTime: timeStr
+        };
+    }
+
+    // Universal parser: try new format first, then legacy
+    function parseMainMessageLine(line) {
+        let result = parseNewFormat(line);
+        if (result) return result;
+        return parseLegacyFormat(line);
     }
 
     function parseFileWithContinuations(text) {
@@ -625,6 +708,8 @@
                 message: fullText,
                 dayTimestamp: msg.dayTimestamp,
                 fullTimestamp: msg.fullTimestamp,
+                displayDate: msg.displayDate || msg.rawDate,
+                displayTime: msg.displayTime || msg.rawTime
             });
         }
         return { messages: finalMessages, skippedLines };
@@ -643,7 +728,7 @@
             if (fileLoaded && parsedMessages.length > 0) {
                 resultsContainer.innerHTML = `<div class="empty-state">🔎 File loaded. Use "Search & Filters" tab → enter speaker names + date range → search.<br>Results will appear here with bold yellow highlights and delete icons.<br>📐 Footer hidden on this tab → full vertical space.</div>`;
             } else if (fileLoaded && parsedMessages.length === 0) {
-                resultsContainer.innerHTML = `<div class="empty-state">⚠️ No valid messages in current file.<br>Check format: <code>[dd/mm/yyyy, HH:MM:SS] Speaker: message</code></div>`;
+                resultsContainer.innerHTML = `<div class="empty-state">⚠️ No valid messages in current file.<br>Check formats: <code>[dd/mm/yyyy, HH:MM:SS] Speaker: message</code> or <code>m/d/yy, HH:MM - Speaker: message</code></div>`;
             } else {
                 resultsContainer.innerHTML = `<div class="empty-state">📂 Upload a chat log first.<br>Then search to see deletable, highlighted results in this tab.<br>Footer is hidden on results tab for maximum space.</div>`;
             }
@@ -664,7 +749,7 @@
             currentHighlightNames = [];
             resetSearchResults();
             if (parsedMessages.length === 0) {
-                resultsContainer.innerHTML = `<div class="empty-state">⚠️ No valid messages found.<br>Use: <code>[15/07/2025, 23:11:51] Samuel EA: message</code><br>Continuation lines are merged automatically.</div>`;
+                resultsContainer.innerHTML = `<div class="empty-state">⚠️ No valid messages found.<br>Use: <code>[15/07/2025, 23:11:51] Samuel EA: message</code><br>or <code>6/6/26, 22:16 - Warriblood EA: message</code><br>Continuation lines are merged automatically.</div>`;
             } else {
                 if (resultsContainer) {
                     resultsContainer.innerHTML = `<div class="empty-state">📄 File loaded (${parsedMessages.length} messages).<br>Go to Search tab, enter names + date range → click Search.<br>Results shown here with 🗑️ delete + bold yellow highlights. No footer on this tab.</div>`;
@@ -684,7 +769,7 @@
         currentDisplayedMessages = [];
         currentHighlightNames = [];
         resetSearchResults();
-        resultsContainer.innerHTML = `<div class="empty-state">📂 upload .txt → required format: <code>[dd/mm/yyyy, HH:MM:SS] Speaker: message</code><br>multi‑line supported · bold yellow highlights · deletable results (Results tab)<br>Footer hidden for full-height view.</div>`;
+        resultsContainer.innerHTML = `<div class="empty-state">📂 upload .txt → supports two formats:<br><code>[dd/mm/yyyy, HH:MM:SS] Speaker: message</code><br><code>m/d/yy, HH:MM - Speaker: message</code><br>multi‑line supported · bold yellow highlights · deletable results (Results tab)<br>Footer hidden for full-height view.</div>`;
     }
 
     function renderResults(messages, highlightNames) {
@@ -717,7 +802,7 @@
             meta.className = 'msg-meta';
             const dtSpan = document.createElement('span');
             dtSpan.className = 'msg-datetime';
-            dtSpan.textContent = `${msg.rawDate} ${msg.rawTime}`;
+            dtSpan.textContent = `${msg.displayDate || msg.rawDate} ${msg.displayTime || msg.rawTime}`;
             const spSpan = document.createElement('span');
             spSpan.className = 'msg-speaker';
             spSpan.textContent = msg.speaker;
@@ -751,7 +836,7 @@
 
     function performSearch() {
         if (!fileLoaded || parsedMessages.length === 0) {
-            resultsContainer.innerHTML = `<div class="empty-state">⚠️ please upload a valid chat log first.<br>format: <code>[15/07/2025, 23:11:51] Samuel EA: text</code></div>`;
+            resultsContainer.innerHTML = `<div class="empty-state">⚠️ please upload a valid chat log first.<br>formats: <code>[15/07/2025, 23:11:51] Samuel EA: text</code><br>or <code>6/6/26, 22:16 - Warriblood EA: text</code></div>`;
             switchTab('results');
             return;
         }
@@ -769,17 +854,17 @@
 
         let startDayMs = null, endDayMs = null;
         if (startDateRaw !== "") {
-            startDayMs = parseDateToMidnightUTC(startDateRaw);
+            startDayMs = parseDateUniversal(startDateRaw);
             if (startDayMs === null) {
-                resultsContainer.innerHTML = `<div class="empty-state">❌ invalid FROM date → use dd/mm/yyyy (e.g., 15/07/2025)</div>`;
+                resultsContainer.innerHTML = `<div class="empty-state">❌ invalid FROM date → use dd/mm/yyyy or m/d/yy</div>`;
                 switchTab('results');
                 return;
             }
         }
         if (endDateRaw !== "") {
-            endDayMs = parseDateToMidnightUTC(endDateRaw);
+            endDayMs = parseDateUniversal(endDateRaw);
             if (endDayMs === null) {
-                resultsContainer.innerHTML = `<div class="empty-state">❌ invalid TO date → use dd/mm/yyyy (e.g., 16/07/2025)</div>`;
+                resultsContainer.innerHTML = `<div class="empty-state">❌ invalid TO date → use dd/mm/yyyy or m/d/yy</div>`;
                 switchTab('results');
                 return;
             }
