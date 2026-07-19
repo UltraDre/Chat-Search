@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>edge searcher · tabbed results · bold yellow · deletable · dual format</title>
+    <title>edge searcher · tabbed results · multi‑select delete</title>
     <style>
         * {
             margin: 0;
@@ -59,7 +59,7 @@
             color: #facc15;
             border-color: #5b6e8c;
             border-bottom-color: #1e293b;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
         .tab-btn:first-child {
             border-top-left-radius: 28px;
@@ -90,8 +90,14 @@
             flex-direction: column;
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px);}
-            to { opacity: 1; transform: translateY(0);}
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* ========= SEARCH PANEL CARD ========= */
@@ -143,7 +149,8 @@
             flex-wrap: wrap;
             margin: 0.8rem 0 0.6rem 0;
         }
-        .file-label, button {
+        .file-label,
+        button {
             font-size: 0.8rem;
             font-weight: 500;
             border-radius: 40px;
@@ -154,7 +161,8 @@
             cursor: pointer;
             transition: 0.2s;
         }
-        .file-label:hover, button:hover {
+        .file-label:hover,
+        button:hover {
             background: #2d3a5e;
             border-color: #5b6e8c;
             transform: translateY(-1px);
@@ -229,6 +237,55 @@
             flex-direction: column;
             min-height: 0;
         }
+
+        /* results header with count + delete button */
+        .results-header {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+            padding: 0 0.2rem;
+        }
+        .result-count-badge {
+            background: #0f172a;
+            border-radius: 40px;
+            padding: 4px 14px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #a5f3fc;
+            border: 1px solid #334155;
+            display: inline-block;
+            align-self: flex-start;
+        }
+        .delete-selected-btn {
+            background: #4c1d2b;
+            border: 1px solid #7f1d3a;
+            color: #fca5a5;
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            display: none;
+            align-self: flex-start;
+        }
+        .delete-selected-btn:hover {
+            background: #7f1d3a;
+            border-color: #b91c3a;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+        .delete-selected-btn.visible {
+            display: inline-block;
+        }
+        .delete-selected-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .message-list {
             flex: 1;
             overflow-y: auto;
@@ -245,10 +302,16 @@
             padding: 10px 14px;
             transition: 0.05s linear;
             position: relative;
+            padding-right: 44px;
         }
         .convo-item:hover {
             background: #1e2a3a;
             border-color: #5b6e8c;
+        }
+        .convo-item.selected {
+            border-color: #60a5fa;
+            background: #1a2744;
+            box-shadow: 0 0 0 1px #60a5fa44;
         }
         .msg-meta {
             display: flex;
@@ -280,7 +343,6 @@
             color: #e2e8f0;
             white-space: pre-wrap;
             word-break: break-word;
-            padding-right: 28px;
         }
         .msg-text mark {
             background: none;
@@ -290,29 +352,35 @@
             border-radius: 0;
             box-shadow: none;
         }
-        .delete-msg-btn {
+
+        /* ===== tiny checkbox ===== */
+        .msg-select {
             position: absolute;
             top: 12px;
             right: 12px;
-            background: none;
-            border: none;
-            font-size: 1rem;
+            width: 14px;
+            height: 14px;
+            margin: 0;
+            padding: 0;
             cursor: pointer;
-            color: #94a3b8;
-            padding: 4px;
-            border-radius: 40px;
-            width: auto;
-            line-height: 1;
+            accent-color: #60a5fa;
+            flex-shrink: 0;
+            border-radius: 3px;
+            border: 1px solid #5b6e8c;
+            background: #0f172a;
             transition: 0.1s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            appearance: auto;
+            -webkit-appearance: auto;
         }
-        .delete-msg-btn:hover {
-            background: #4b5563;
-            color: #f87171;
-            transform: scale(1.05);
+        .msg-select:hover {
+            border-color: #93c5fd;
+            transform: scale(1.1);
         }
+        .msg-select:checked {
+            accent-color: #60a5fa;
+            border-color: #60a5fa;
+        }
+
         .empty-state {
             text-align: center;
             padding: 2rem 1.5rem;
@@ -322,18 +390,6 @@
             font-size: 0.8rem;
             border: 1px solid #2d3a5e;
             margin: 0.2rem 0;
-        }
-        .result-count-badge {
-            background: #0f172a;
-            border-radius: 40px;
-            padding: 4px 14px;
-            font-size: 0.7rem;
-            font-weight: 500;
-            color: #a5f3fc;
-            display: inline-block;
-            margin-bottom: 12px;
-            border: 1px solid #334155;
-            align-self: flex-start;
         }
         footer {
             text-align: center;
@@ -349,592 +405,697 @@
         }
 
         @media (max-width: 640px) {
-            body { padding: 0.8rem; }
-            .control-card { padding: 1rem; }
-            .flex-row { flex-direction: column; gap: 0.6rem; }
-            .msg-text { padding-right: 24px; }
-            .delete-msg-btn { top: 8px; right: 8px; font-size: 0.9rem; }
-            .tab-btn { padding: 0.5rem 1rem; font-size: 0.75rem; }
+            body {
+                padding: 0.8rem;
+            }
+            .control-card {
+                padding: 1rem;
+            }
+            .flex-row {
+                flex-direction: column;
+                gap: 0.6rem;
+            }
+            .msg-text {
+                padding-right: 0;
+            }
+            .msg-select {
+                top: 10px;
+                right: 10px;
+                width: 16px;
+                height: 16px;
+            }
+            .convo-item {
+                padding-right: 38px;
+            }
+            .tab-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.75rem;
+            }
         }
     </style>
 </head>
 <body>
-<div class="app">
-    <div class="tab-bar">
-        <button class="tab-btn active" data-tab="search">🔎 Search & Filters</button>
-        <button class="tab-btn" data-tab="results">📋 Search Results</button>
-    </div>
+    <div class="app">
+        <div class="tab-bar">
+            <button class="tab-btn active" data-tab="search">🔎 Search &amp; Filters</button>
+            <button class="tab-btn" data-tab="results">📋 Search Results</button>
+        </div>
 
-    <div class="tab-panels">
-        <!-- TAB 1: SEARCH / CONTROL PANEL -->
-        <div class="tab-panel active-panel" id="searchPanel">
-            <div class="control-card">
-                <div class="flex-between">
-                    <div>
-                        <h1>⌕ conversation searcher</h1>
-                        <div class="sub">upload · filter by speaker(s) + date range · <span style="color:#facc15; font-weight:600;">bold yellow matches</span></div>
+        <div class="tab-panels">
+            <!-- TAB 1: SEARCH / CONTROL PANEL -->
+            <div class="tab-panel active-panel" id="searchPanel">
+                <div class="control-card">
+                    <div class="flex-between">
+                        <div>
+                            <h1>⌕ conversation searcher</h1>
+                            <div class="sub">upload · filter by speaker(s) + date range · <span style="color:#facc15; font-weight:600;">bold yellow matches</span></div>
+                        </div>
+                        <div class="stats-badge" id="parseStats">📄 no file</div>
                     </div>
-                    <div class="stats-badge" id="parseStats">📄 no file</div>
+
+                    <div class="file-zone">
+                        <input type="file" id="fileInput" accept=".txt, .text/plain" style="display: none;">
+                        <button class="file-label" id="uploadBtn">📁 choose .txt</button>
+                        <span id="fileName">no file selected</span>
+                        <button id="clearFileBtn" class="secondary" style="padding: 5px 12px;">🗑 clear</button>
+                    </div>
+
+                    <div class="flex-row">
+                        <div class="field-group">
+                            <label>speaker 1 *</label>
+                            <input type="text" id="name1" placeholder="e.g., Samuel EA" autocomplete="off">
+                        </div>
+                        <div class="field-group">
+                            <label>speaker 2 (optional)</label>
+                            <input type="text" id="name2" placeholder="e.g., Warriblood EA" autocomplete="off">
+                        </div>
+                        <div class="field-group">
+                            <label>from</label>
+                            <input type="text" id="startDate" placeholder="dd/mm/yyyy or m/d/yy" autocomplete="off">
+                        </div>
+                        <div class="field-group">
+                            <label>to</label>
+                            <input type="text" id="endDate" placeholder="dd/mm/yyyy or m/d/yy" autocomplete="off">
+                        </div>
+                        <div class="field-group" style="flex: 0.4; min-width: 90px;">
+                            <label>🔍</label>
+                            <button id="searchBtn" style="width:100%">search</button>
+                        </div>
+                    </div>
+
+                    <div class="format-example">
+                        <strong>Supports two formats:</strong><br>
+                        🆕 <code>[dd/mm/yyyy, HH:MM:SS] Speaker: message</code><br>
+                        📅 <code>m/d/yy, HH:MM - Speaker: message</code><br>
+                        <span style="color:#a5f3fc;">↳ multi‑line:</span> any line without timestamp is attached to previous message<br>
+                        examples:<br>
+                        <code>[15/07/2025, 23:11:51] Samuel EA: Something that I deal with very well.</code><br>
+                        <code>6/6/26, 22:16 - Warriblood EA: Waiting for you</code><br>
+                        <span style="color:#facc15; font-weight:500;">✨ bold yellow matches · ☑️ select multiple with tiny checkboxes · 🗑️ delete selected</span><br>
+                        <span style="color:#7dd3fc;">📌 Results appear in "Search Results" tab → selectable, deletable, highlighted, no footer</span>
+                    </div>
                 </div>
+            </div>
 
-                <div class="file-zone">
-                    <input type="file" id="fileInput" accept=".txt, .text/plain" style="display: none;">
-                    <button class="file-label" id="uploadBtn">📁 choose .txt</button>
-                    <span id="fileName">no file selected</span>
-                    <button id="clearFileBtn" class="secondary" style="padding: 5px 12px;">🗑 clear</button>
-                </div>
-
-                <div class="flex-row">
-                    <div class="field-group">
-                        <label>speaker 1 *</label>
-                        <input type="text" id="name1" placeholder="e.g., Samuel EA" autocomplete="off">
+            <!-- TAB 2: RESULTS PANEL (raw, no card, footer hidden) -->
+            <div class="tab-panel" id="resultsPanel">
+                <div class="results-raw">
+                    <div class="results-header" id="resultsHeader">
+                        <span class="result-count-badge" id="resultCountBadge">0 messages</span>
+                        <button class="delete-selected-btn" id="deleteSelectedBtn">🗑 Delete selected</button>
                     </div>
-                    <div class="field-group">
-                        <label>speaker 2 (optional)</label>
-                        <input type="text" id="name2" placeholder="e.g., Warriblood EA" autocomplete="off">
+                    <div id="resultsContainer" class="message-list">
+                        <div class="empty-state">✨ perform a search in the "Search &amp; Filters" tab → results will appear here.<br>bold yellow highlights · ☑️ check messages → delete selected<br><span style="color:#a5f3fc;">📐 Footer hidden on this tab → results use full vertical space.</span></div>
                     </div>
-                    <div class="field-group">
-                        <label>from</label>
-                        <input type="text" id="startDate" placeholder="dd/mm/yyyy or m/d/yy" autocomplete="off">
-                    </div>
-                    <div class="field-group">
-                        <label>to</label>
-                        <input type="text" id="endDate" placeholder="dd/mm/yyyy or m/d/yy" autocomplete="off">
-                    </div>
-                    <div class="field-group" style="flex: 0.4; min-width: 90px;">
-                        <label>🔍</label>
-                        <button id="searchBtn" style="width:100%">search</button>
-                    </div>
-                </div>
-
-                <div class="format-example">
-                    <strong>Supports two formats:</strong><br>
-                    🆕 <code>[dd/mm/yyyy, HH:MM:SS] Speaker: message</code><br>
-                    📅 <code>m/d/yy, HH:MM - Speaker: message</code><br>
-                    <span style="color:#a5f3fc;">↳ multi‑line:</span> any line without timestamp is attached to previous message<br>
-                    examples:<br>
-                    <code>[15/07/2025, 23:11:51] Samuel EA: Something that I deal with very well.</code><br>
-                    <code>6/6/26, 22:16 - Warriblood EA: Waiting for you</code><br>
-                    <span style="color:#facc15; font-weight:500;">✨ bold yellow matches · 🗑️ delete any message from current results</span><br>
-                    <span style="color:#7dd3fc;">📌 Results appear in "Search Results" tab → deletable & highlighted, no footer for full vertical space</span>
                 </div>
             </div>
         </div>
 
-        <!-- TAB 2: RESULTS PANEL (raw, no card, footer hidden) -->
-        <div class="tab-panel" id="resultsPanel">
-            <div class="results-raw">
-                <div id="resultsContainer" class="message-list">
-                    <div class="empty-state">✨ perform a search in the "Search & Filters" tab → results will appear here.<br>bold yellow highlights · 🗑️ delete any message from current results<br><span style="color:#a5f3fc;">📐 Footer hidden on this tab → results use full vertical space.</span></div>
-                </div>
-            </div>
-        </div>
+        <footer id="mainFooter">dual format: [dd/mm/yyyy, HH:MM:SS] or m/d/yy, HH:MM · continuation lines merged · speaker names = bold yellow · multi‑select delete · tabbed results</footer>
     </div>
-    
-    <footer id="mainFooter">dual format: [dd/mm/yyyy, HH:MM:SS] or m/d/yy, HH:MM · continuation lines merged · speaker names = bold yellow · delete per message · tabbed results</footer>
-</div>
 
-<script>
-    // ---------- GLOBALS ----------
-    let parsedMessages = [];       
-    let fileLoaded = false;
-    let currentDisplayedMessages = [];   
-    let currentHighlightNames = [];       
+    <script>
+        // ---------- GLOBALS ----------
+        let parsedMessages = [];
+        let fileLoaded = false;
+        let currentDisplayedMessages = [];
+        let currentHighlightNames = [];
+        let selectedMessages = new Set();
 
-    // DOM elements
-    const fileInput = document.getElementById('fileInput');
-    const uploadBtn = document.getElementById('uploadBtn');
-    const clearFileBtn = document.getElementById('clearFileBtn');
-    const fileNameSpan = document.getElementById('fileName');
-    const parseStatsSpan = document.getElementById('parseStats');
-    const name1Input = document.getElementById('name1');
-    const name2Input = document.getElementById('name2');
-    const startDateInput = document.getElementById('startDate');
-    const endDateInput = document.getElementById('endDate');
-    const searchBtn = document.getElementById('searchBtn');
-    const resultsContainer = document.getElementById('resultsContainer');
-    const mainFooter = document.getElementById('mainFooter');
+        // DOM elements
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const clearFileBtn = document.getElementById('clearFileBtn');
+        const fileNameSpan = document.getElementById('fileName');
+        const parseStatsSpan = document.getElementById('parseStats');
+        const name1Input = document.getElementById('name1');
+        const name2Input = document.getElementById('name2');
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+        const searchBtn = document.getElementById('searchBtn');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const mainFooter = document.getElementById('mainFooter');
+        const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+        const resultCountBadge = document.getElementById('resultCountBadge');
 
-    // Tab management
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const panels = document.querySelectorAll('.tab-panel');
-    
-    function switchTab(tabId) {
-        panels.forEach(panel => panel.classList.remove('active-panel'));
-        tabBtns.forEach(btn => btn.classList.remove('active'));
-        const activePanel = document.getElementById(`${tabId}Panel`);
-        if (activePanel) activePanel.classList.add('active-panel');
-        const activeBtn = Array.from(tabBtns).find(btn => btn.dataset.tab === tabId);
-        if (activeBtn) activeBtn.classList.add('active');
-        
-        if (tabId === 'results') {
-            if (mainFooter) mainFooter.classList.add('hide-footer');
-        } else {
-            if (mainFooter) mainFooter.classList.remove('hide-footer');
+        // Tab management
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const panels = document.querySelectorAll('.tab-panel');
+
+        function switchTab(tabId) {
+            panels.forEach(panel => panel.classList.remove('active-panel'));
+            tabBtns.forEach(btn => btn.classList.remove('active'));
+            const activePanel = document.getElementById(`${tabId}Panel`);
+            if (activePanel) activePanel.classList.add('active-panel');
+            const activeBtn = Array.from(tabBtns).find(btn => btn.dataset.tab === tabId);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            if (tabId === 'results') {
+                if (mainFooter) mainFooter.classList.add('hide-footer');
+            } else {
+                if (mainFooter) mainFooter.classList.remove('hide-footer');
+            }
+            // when switching to results, update button visibility
+            if (tabId === 'results') {
+                updateDeleteButtonVisibility();
+            }
         }
-    }
 
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const tabName = btn.dataset.tab;
-            if (tabName === 'search') switchTab('search');
-            else if (tabName === 'results') switchTab('results');
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabName = btn.dataset.tab;
+                if (tabName === 'search') switchTab('search');
+                else if (tabName === 'results') switchTab('results');
+            });
         });
-    });
 
-    if (mainFooter) mainFooter.classList.remove('hide-footer');
+        if (mainFooter) mainFooter.classList.remove('hide-footer');
 
-    function escapeRegex(str) {
-        return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
+        function escapeRegex(str) {
+            return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
 
-    function highlightText(text, highlightNames) {
-        if (!highlightNames || highlightNames.length === 0) {
-            return text.replace(/[&<>]/g, function(m) {
+        function highlightText(text, highlightNames) {
+            if (!highlightNames || highlightNames.length === 0) {
+                return text.replace(/[&<>]/g, function(m) {
+                    if (m === '&') return '&amp;';
+                    if (m === '<') return '&lt;';
+                    if (m === '>') return '&gt;';
+                    return m;
+                }).replace(/\n/g, '<br>');
+            }
+
+            let escaped = text.replace(/[&<>]/g, function(m) {
                 if (m === '&') return '&amp;';
                 if (m === '<') return '&lt;';
                 if (m === '>') return '&gt;';
                 return m;
-            }).replace(/\n/g, '<br>');
-        }
-        
-        let escaped = text.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-        
-        const uniqueNames = [];
-        const lowerSet = new Set();
-        for (const name of highlightNames) {
-            const lower = name.toLowerCase();
-            if (!lowerSet.has(lower)) {
-                lowerSet.add(lower);
-                uniqueNames.push(name);
-            }
-        }
-        uniqueNames.sort((a,b) => b.length - a.length);
-        for (const name of uniqueNames) {
-            if (name.length === 0) continue;
-            const regex = new RegExp(`(${escapeRegex(name)})`, 'gi');
-            escaped = escaped.replace(regex, `<mark>$1</mark>`);
-        }
-        return escaped.replace(/\n/g, '<br>');
-    }
+            });
 
-    // ---------- DATE PARSERS ----------
-    // Parse dd/mm/yyyy format (for new format)
-    function parseDateDMY(dateStr) {
-        if (!dateStr || typeof dateStr !== 'string') return null;
-        const trimmed = dateStr.trim();
-        const regex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
-        const match = trimmed.match(regex);
-        if (!match) return null;
-        let day = parseInt(match[1], 10);
-        let month = parseInt(match[2], 10);
-        let year = parseInt(match[3], 10);
-        if (month < 1 || month > 12 || day < 1 || day > 31) return null;
-        const dateObj = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
-        return isNaN(dateObj.getTime()) ? null : dateObj.getTime();
-    }
-
-    // Parse m/d/yy format (for legacy format)
-    function parseDateMDY(dateStr) {
-        if (!dateStr || typeof dateStr !== 'string') return null;
-        const trimmed = dateStr.trim();
-        const regex = /^(\d{1,2})\/(\d{1,2})\/(\d{2})$/;
-        const match = trimmed.match(regex);
-        if (!match) return null;
-        let month = parseInt(match[1], 10);
-        let day = parseInt(match[2], 10);
-        let yearShort = parseInt(match[3], 10);
-        if (month < 1 || month > 12 || day < 1 || day > 31) return null;
-        let fullYear = 2000 + yearShort;
-        const dateObj = new Date(Date.UTC(fullYear, month - 1, day, 0, 0, 0, 0));
-        return isNaN(dateObj.getTime()) ? null : dateObj.getTime();
-    }
-
-    // Universal date parser: try DMY first, then MDY
-    function parseDateUniversal(dateStr) {
-        if (!dateStr || typeof dateStr !== 'string') return null;
-        let result = parseDateDMY(dateStr);
-        if (result !== null) return result;
-        return parseDateMDY(dateStr);
-    }
-
-    // Normalise uncommon Unicode whitespace
-    function normaliseWhitespace(line) {
-        return line.replace(/[\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]/g, ' ');
-    }
-
-    // ---------- FORMAT 1: [dd/mm/yyyy, HH:MM:SS] Speaker: message ----------
-    function parseNewFormat(line) {
-        let cleaned = normaliseWhitespace(line);
-        const regex = /^\[(\d{1,2}\/\d{1,2}\/\d{4}),\s+(\d{1,2}:\d{2}:\d{2})\]\s+([^:]+):\s*(.*)$/;
-        const match = cleaned.match(regex);
-        if (!match) return null;
-
-        const dateStr = match[1];
-        const timeStr = match[2];
-        let speakerRaw = match[3].trim();
-        const firstLineMsg = match[4].trim();
-        if (!speakerRaw) return null;
-
-        const timeRegex = /^(\d{1,2}):(\d{2}):(\d{2})$/;
-        const timeMatch = timeStr.match(timeRegex);
-        if (!timeMatch) return null;
-        let hours = parseInt(timeMatch[1], 10);
-        let minutes = parseInt(timeMatch[2], 10);
-        let seconds = parseInt(timeMatch[3], 10);
-        if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59 || seconds < 0 || seconds > 59) return null;
-
-        const dateParts = dateStr.split('/');
-        if (dateParts.length !== 3) return null;
-        let day = parseInt(dateParts[0], 10);
-        let month = parseInt(dateParts[1], 10);
-        let year = parseInt(dateParts[2], 10);
-        if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
-        if (month < 1 || month > 12 || day < 1 || day > 31) return null;
-
-        const dayMidnightUTC = Date.UTC(year, month - 1, day, 0, 0, 0, 0);
-        if (isNaN(dayMidnightUTC)) return null;
-        const fullDateObj = new Date(Date.UTC(year, month - 1, day, hours, minutes, seconds, 0));
-        if (isNaN(fullDateObj.getTime())) return null;
-
-        return {
-            rawDate: dateStr,
-            rawTime: timeStr,
-            speaker: speakerRaw,
-            message: firstLineMsg,
-            speakerLower: speakerRaw.toLowerCase(),
-            dayTimestamp: dayMidnightUTC,
-            fullTimestamp: fullDateObj.getTime(),
-            displayDate: dateStr,
-            displayTime: timeStr
-        };
-    }
-
-    // ---------- FORMAT 2: m/d/yy, HH:MM - Speaker: message ----------
-    function parseLegacyFormat(line) {
-        let cleaned = normaliseWhitespace(line);
-        const regex = /^(\d{1,2}\/\d{1,2}\/\d{2}),\s+(\d{1,2}:\d{2})\s+-\s+([^:]+):\s*(.*)$/;
-        const match = cleaned.match(regex);
-        if (!match) return null;
-
-        const dateStr = match[1];
-        const timeStr = match[2];
-        let speakerRaw = match[3].trim();
-        const firstLineMsg = match[4].trim();
-        if (!speakerRaw) return null;
-
-        const timeRegex = /^(\d{1,2}):(\d{2})$/;
-        const timeMatch = timeStr.match(timeRegex);
-        if (!timeMatch) return null;
-        let hours = parseInt(timeMatch[1], 10);
-        let minutes = parseInt(timeMatch[2], 10);
-        if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
-
-        const dateParts = dateStr.split('/');
-        if (dateParts.length !== 3) return null;
-        let month = parseInt(dateParts[0], 10);
-        let day = parseInt(dateParts[1], 10);
-        let yy = parseInt(dateParts[2], 10);
-        if (isNaN(month) || isNaN(day) || isNaN(yy)) return null;
-        if (month < 1 || month > 12 || day < 1 || day > 31) return null;
-        let fullYear = 2000 + yy;
-
-        const dayMidnightUTC = Date.UTC(fullYear, month - 1, day, 0, 0, 0, 0);
-        if (isNaN(dayMidnightUTC)) return null;
-        const fullDateObj = new Date(Date.UTC(fullYear, month - 1, day, hours, minutes, 0, 0));
-        if (isNaN(fullDateObj.getTime())) return null;
-
-        return {
-            rawDate: dateStr,
-            rawTime: timeStr,
-            speaker: speakerRaw,
-            message: firstLineMsg,
-            speakerLower: speakerRaw.toLowerCase(),
-            dayTimestamp: dayMidnightUTC,
-            fullTimestamp: fullDateObj.getTime(),
-            displayDate: dateStr,
-            displayTime: timeStr
-        };
-    }
-
-    // Universal parser: try new format first, then legacy
-    function parseMainMessageLine(line) {
-        let result = parseNewFormat(line);
-        if (result) return result;
-        return parseLegacyFormat(line);
-    }
-
-    function parseFileWithContinuations(text) {
-        const lines = text.split(/\r?\n/);
-        const messages = [];
-        let currentMessage = null;
-        let skippedLines = 0;
-
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i];
-            const mainMatch = parseMainMessageLine(line);
-            if (mainMatch) {
-                if (currentMessage) messages.push(currentMessage);
-                currentMessage = mainMatch;
-                currentMessage.continuationLines = [];
-            } else {
-                if (currentMessage && line.trim() !== "") {
-                    currentMessage.continuationLines.push(line);
-                } else if (!currentMessage && line.trim() !== "") {
-                    skippedLines++;
-                } else if (currentMessage && line === "") {
-                    currentMessage.continuationLines.push(line);
+            const uniqueNames = [];
+            const lowerSet = new Set();
+            for (const name of highlightNames) {
+                const lower = name.toLowerCase();
+                if (!lowerSet.has(lower)) {
+                    lowerSet.add(lower);
+                    uniqueNames.push(name);
                 }
             }
-        }
-        if (currentMessage) messages.push(currentMessage);
-
-        const finalMessages = [];
-        for (const msg of messages) {
-            let fullText = msg.message;
-            if (msg.continuationLines.length > 0) {
-                fullText += "\n" + msg.continuationLines.join("\n");
+            uniqueNames.sort((a, b) => b.length - a.length);
+            for (const name of uniqueNames) {
+                if (name.length === 0) continue;
+                const regex = new RegExp(`(${escapeRegex(name)})`, 'gi');
+                escaped = escaped.replace(regex, `<mark>$1</mark>`);
             }
-            finalMessages.push({
-                rawDate: msg.rawDate,
-                rawTime: msg.rawTime,
-                speaker: msg.speaker,
-                speakerLower: msg.speakerLower,
-                message: fullText,
-                dayTimestamp: msg.dayTimestamp,
-                fullTimestamp: msg.fullTimestamp,
-                displayDate: msg.displayDate || msg.rawDate,
-                displayTime: msg.displayTime || msg.rawTime
-            });
+            return escaped.replace(/\n/g, '<br>');
         }
-        return { messages: finalMessages, skippedLines };
-    }
 
-    function updateStatsDisplay(count, skipped = 0) {
-        if (count === 0 && !fileLoaded) parseStatsSpan.innerHTML = `📄 no file`;
-        else if (count === 0 && fileLoaded) parseStatsSpan.innerHTML = `⚠️ ${skipped} invalid lines`;
-        else parseStatsSpan.innerHTML = `✅ ${count} msgs${skipped ? ` · +${skipped} orphan` : ''}`;
-    }
+        // ---------- DATE PARSERS ----------
+        function parseDateDMY(dateStr) {
+            if (!dateStr || typeof dateStr !== 'string') return null;
+            const trimmed = dateStr.trim();
+            const regex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+            const match = trimmed.match(regex);
+            if (!match) return null;
+            let day = parseInt(match[1], 10);
+            let month = parseInt(match[2], 10);
+            let year = parseInt(match[3], 10);
+            if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+            const dateObj = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+            return isNaN(dateObj.getTime()) ? null : dateObj.getTime();
+        }
 
-    function resetSearchResults() {
-        currentDisplayedMessages = [];
-        currentHighlightNames = [];
-        if (resultsContainer) {
-            if (fileLoaded && parsedMessages.length > 0) {
-                resultsContainer.innerHTML = `<div class="empty-state">🔎 File loaded. Use "Search & Filters" tab → enter speaker names + date range → search.<br>Results will appear here with bold yellow highlights and delete icons.<br>📐 Footer hidden on this tab → full vertical space.</div>`;
-            } else if (fileLoaded && parsedMessages.length === 0) {
-                resultsContainer.innerHTML = `<div class="empty-state">⚠️ No valid messages in current file.<br>Check formats: <code>[dd/mm/yyyy, HH:MM:SS] Speaker: message</code> or <code>m/d/yy, HH:MM - Speaker: message</code></div>`;
-            } else {
-                resultsContainer.innerHTML = `<div class="empty-state">📂 Upload a chat log first.<br>Then search to see deletable, highlighted results in this tab.<br>Footer is hidden on results tab for maximum space.</div>`;
+        function parseDateMDY(dateStr) {
+            if (!dateStr || typeof dateStr !== 'string') return null;
+            const trimmed = dateStr.trim();
+            const regex = /^(\d{1,2})\/(\d{1,2})\/(\d{2})$/;
+            const match = trimmed.match(regex);
+            if (!match) return null;
+            let month = parseInt(match[1], 10);
+            let day = parseInt(match[2], 10);
+            let yearShort = parseInt(match[3], 10);
+            if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+            let fullYear = 2000 + yearShort;
+            const dateObj = new Date(Date.UTC(fullYear, month - 1, day, 0, 0, 0, 0));
+            return isNaN(dateObj.getTime()) ? null : dateObj.getTime();
+        }
+
+        function parseDateUniversal(dateStr) {
+            if (!dateStr || typeof dateStr !== 'string') return null;
+            let result = parseDateDMY(dateStr);
+            if (result !== null) return result;
+            return parseDateMDY(dateStr);
+        }
+
+        function normaliseWhitespace(line) {
+            return line.replace(/[\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]/g, ' ');
+        }
+
+        // ---------- FORMAT 1: [dd/mm/yyyy, HH:MM:SS] Speaker: message ----------
+        function parseNewFormat(line) {
+            let cleaned = normaliseWhitespace(line);
+            const regex = /^\[(\d{1,2}\/\d{1,2}\/\d{4}),\s+(\d{1,2}:\d{2}:\d{2})\]\s+([^:]+):\s*(.*)$/;
+            const match = cleaned.match(regex);
+            if (!match) return null;
+
+            const dateStr = match[1];
+            const timeStr = match[2];
+            let speakerRaw = match[3].trim();
+            const firstLineMsg = match[4].trim();
+            if (!speakerRaw) return null;
+
+            const timeRegex = /^(\d{1,2}):(\d{2}):(\d{2})$/;
+            const timeMatch = timeStr.match(timeRegex);
+            if (!timeMatch) return null;
+            let hours = parseInt(timeMatch[1], 10);
+            let minutes = parseInt(timeMatch[2], 10);
+            let seconds = parseInt(timeMatch[3], 10);
+            if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59 || seconds < 0 || seconds > 59) return null;
+
+            const dateParts = dateStr.split('/');
+            if (dateParts.length !== 3) return null;
+            let day = parseInt(dateParts[0], 10);
+            let month = parseInt(dateParts[1], 10);
+            let year = parseInt(dateParts[2], 10);
+            if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+            if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+
+            const dayMidnightUTC = Date.UTC(year, month - 1, day, 0, 0, 0, 0);
+            if (isNaN(dayMidnightUTC)) return null;
+            const fullDateObj = new Date(Date.UTC(year, month - 1, day, hours, minutes, seconds, 0));
+            if (isNaN(fullDateObj.getTime())) return null;
+
+            return {
+                rawDate: dateStr,
+                rawTime: timeStr,
+                speaker: speakerRaw,
+                message: firstLineMsg,
+                speakerLower: speakerRaw.toLowerCase(),
+                dayTimestamp: dayMidnightUTC,
+                fullTimestamp: fullDateObj.getTime(),
+                displayDate: dateStr,
+                displayTime: timeStr
+            };
+        }
+
+        // ---------- FORMAT 2: m/d/yy, HH:MM - Speaker: message ----------
+        function parseLegacyFormat(line) {
+            let cleaned = normaliseWhitespace(line);
+            const regex = /^(\d{1,2}\/\d{1,2}\/\d{2}),\s+(\d{1,2}:\d{2})\s+-\s+([^:]+):\s*(.*)$/;
+            const match = cleaned.match(regex);
+            if (!match) return null;
+
+            const dateStr = match[1];
+            const timeStr = match[2];
+            let speakerRaw = match[3].trim();
+            const firstLineMsg = match[4].trim();
+            if (!speakerRaw) return null;
+
+            const timeRegex = /^(\d{1,2}):(\d{2})$/;
+            const timeMatch = timeStr.match(timeRegex);
+            if (!timeMatch) return null;
+            let hours = parseInt(timeMatch[1], 10);
+            let minutes = parseInt(timeMatch[2], 10);
+            if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
+
+            const dateParts = dateStr.split('/');
+            if (dateParts.length !== 3) return null;
+            let month = parseInt(dateParts[0], 10);
+            let day = parseInt(dateParts[1], 10);
+            let yy = parseInt(dateParts[2], 10);
+            if (isNaN(month) || isNaN(day) || isNaN(yy)) return null;
+            if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+            let fullYear = 2000 + yy;
+
+            const dayMidnightUTC = Date.UTC(fullYear, month - 1, day, 0, 0, 0, 0);
+            if (isNaN(dayMidnightUTC)) return null;
+            const fullDateObj = new Date(Date.UTC(fullYear, month - 1, day, hours, minutes, 0, 0));
+            if (isNaN(fullDateObj.getTime())) return null;
+
+            return {
+                rawDate: dateStr,
+                rawTime: timeStr,
+                speaker: speakerRaw,
+                message: firstLineMsg,
+                speakerLower: speakerRaw.toLowerCase(),
+                dayTimestamp: dayMidnightUTC,
+                fullTimestamp: fullDateObj.getTime(),
+                displayDate: dateStr,
+                displayTime: timeStr
+            };
+        }
+
+        function parseMainMessageLine(line) {
+            let result = parseNewFormat(line);
+            if (result) return result;
+            return parseLegacyFormat(line);
+        }
+
+        function parseFileWithContinuations(text) {
+            const lines = text.split(/\r?\n/);
+            const messages = [];
+            let currentMessage = null;
+            let skippedLines = 0;
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const mainMatch = parseMainMessageLine(line);
+                if (mainMatch) {
+                    if (currentMessage) messages.push(currentMessage);
+                    currentMessage = mainMatch;
+                    currentMessage.continuationLines = [];
+                } else {
+                    if (currentMessage && line.trim() !== "") {
+                        currentMessage.continuationLines.push(line);
+                    } else if (!currentMessage && line.trim() !== "") {
+                        skippedLines++;
+                    } else if (currentMessage && line === "") {
+                        currentMessage.continuationLines.push(line);
+                    }
+                }
             }
-        }
-    }
+            if (currentMessage) messages.push(currentMessage);
 
-    function loadFile(file) {
-        if (!file) { resetFileState(); return; }
-        fileNameSpan.textContent = file.name;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const content = e.target.result;
-            const { messages, skippedLines } = parseFileWithContinuations(content);
-            parsedMessages = messages;
-            fileLoaded = true;
-            updateStatsDisplay(parsedMessages.length, skippedLines);
+            const finalMessages = [];
+            for (const msg of messages) {
+                let fullText = msg.message;
+                if (msg.continuationLines.length > 0) {
+                    fullText += "\n" + msg.continuationLines.join("\n");
+                }
+                finalMessages.push({
+                    rawDate: msg.rawDate,
+                    rawTime: msg.rawTime,
+                    speaker: msg.speaker,
+                    speakerLower: msg.speakerLower,
+                    message: fullText,
+                    dayTimestamp: msg.dayTimestamp,
+                    fullTimestamp: msg.fullTimestamp,
+                    displayDate: msg.displayDate || msg.rawDate,
+                    displayTime: msg.displayTime || msg.rawTime
+                });
+            }
+            return { messages: finalMessages, skippedLines };
+        }
+
+        function updateStatsDisplay(count, skipped = 0) {
+            if (count === 0 && !fileLoaded) parseStatsSpan.innerHTML = `📄 no file`;
+            else if (count === 0 && fileLoaded) parseStatsSpan.innerHTML = `⚠️ ${skipped} invalid lines`;
+            else parseStatsSpan.innerHTML = `✅ ${count} msgs${skipped ? ` · +${skipped} orphan` : ''}`;
+        }
+
+        function resetSearchResults() {
             currentDisplayedMessages = [];
             currentHighlightNames = [];
-            resetSearchResults();
-            if (parsedMessages.length === 0) {
-                resultsContainer.innerHTML = `<div class="empty-state">⚠️ No valid messages found.<br>Use: <code>[15/07/2025, 23:11:51] Samuel EA: message</code><br>or <code>6/6/26, 22:16 - Warriblood EA: message</code><br>Continuation lines are merged automatically.</div>`;
-            } else {
-                if (resultsContainer) {
-                    resultsContainer.innerHTML = `<div class="empty-state">📄 File loaded (${parsedMessages.length} messages).<br>Go to Search tab, enter names + date range → click Search.<br>Results shown here with 🗑️ delete + bold yellow highlights. No footer on this tab.</div>`;
+            selectedMessages.clear();
+            if (resultsContainer) {
+                if (fileLoaded && parsedMessages.length > 0) {
+                    resultsContainer.innerHTML =
+                        `<div class="empty-state">🔎 File loaded. Use "Search & Filters" tab → enter speaker names + date range → search.<br>Results will appear here with bold yellow highlights and tiny select checkboxes.<br>📐 Footer hidden on this tab → full vertical space.</div>`;
+                } else if (fileLoaded && parsedMessages.length === 0) {
+                    resultsContainer.innerHTML =
+                        `<div class="empty-state">⚠️ No valid messages in current file.<br>Check formats: <code>[dd/mm/yyyy, HH:MM:SS] Speaker: message</code> or <code>m/d/yy, HH:MM - Speaker: message</code></div>`;
+                } else {
+                    resultsContainer.innerHTML =
+                        `<div class="empty-state">📂 Upload a chat log first.<br>Then search to see selectable, deletable, highlighted results in this tab.<br>Footer is hidden on results tab for maximum space.</div>`;
                 }
             }
-        };
-        reader.onerror = () => { alert("file read error"); resetFileState(); };
-        reader.readAsText(file, "UTF-8");
-    }
+            updateResultCount(0);
+            updateDeleteButtonVisibility();
+        }
 
-    function resetFileState() {
-        parsedMessages = [];
-        fileLoaded = false;
-        fileNameSpan.textContent = "no file selected";
-        updateStatsDisplay(0, 0);
-        fileInput.value = "";
-        currentDisplayedMessages = [];
-        currentHighlightNames = [];
-        resetSearchResults();
-        resultsContainer.innerHTML = `<div class="empty-state">📂 upload .txt → supports two formats:<br><code>[dd/mm/yyyy, HH:MM:SS] Speaker: message</code><br><code>m/d/yy, HH:MM - Speaker: message</code><br>multi‑line supported · bold yellow highlights · deletable results (Results tab)<br>Footer hidden for full-height view.</div>`;
-    }
+        function loadFile(file) {
+            if (!file) { resetFileState(); return; }
+            fileNameSpan.textContent = file.name;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const content = e.target.result;
+                const { messages, skippedLines } = parseFileWithContinuations(content);
+                parsedMessages = messages;
+                fileLoaded = true;
+                updateStatsDisplay(parsedMessages.length, skippedLines);
+                currentDisplayedMessages = [];
+                currentHighlightNames = [];
+                selectedMessages.clear();
+                resetSearchResults();
+                if (parsedMessages.length === 0) {
+                    resultsContainer.innerHTML =
+                        `<div class="empty-state">⚠️ No valid messages found.<br>Use: <code>[15/07/2025, 23:11:51] Samuel EA: message</code><br>or <code>6/6/26, 22:16 - Warriblood EA: message</code><br>Continuation lines are merged automatically.</div>`;
+                } else {
+                    if (resultsContainer) {
+                        resultsContainer.innerHTML =
+                            `<div class="empty-state">📄 File loaded (${parsedMessages.length} messages).<br>Go to Search tab, enter names + date range → click Search.<br>Results shown here with ☑️ select + 🗑️ delete selected. No footer on this tab.</div>`;
+                    }
+                }
+                updateDeleteButtonVisibility();
+            };
+            reader.onerror = () => { alert("file read error");
+                resetFileState(); };
+            reader.readAsText(file, "UTF-8");
+        }
 
-    function renderResults(messages, highlightNames) {
-        if (!messages.length) {
-            if (fileLoaded && parsedMessages.length) {
-                resultsContainer.innerHTML = `<div class="empty-state">✨ No messages match current filters. Adjust speaker names or date range.<br>🗑️ Deleted messages only removed from this view (source file untouched).</div>`;
-            } else if (!fileLoaded) {
-                resultsContainer.innerHTML = `<div class="empty-state">📂 Upload a chat log to start. Then search → results appear here.<br>Footer hidden on this tab → results use full height.</div>`;
-            } else if (fileLoaded && parsedMessages.length === 0) {
-                resultsContainer.innerHTML = `<div class="empty-state">⚠️ No valid messages in file. Check format.</div>`;
+        function resetFileState() {
+            parsedMessages = [];
+            fileLoaded = false;
+            fileNameSpan.textContent = "no file selected";
+            updateStatsDisplay(0, 0);
+            fileInput.value = "";
+            currentDisplayedMessages = [];
+            currentHighlightNames = [];
+            selectedMessages.clear();
+            resetSearchResults();
+            resultsContainer.innerHTML =
+                `<div class="empty-state">📂 upload .txt → supports two formats:<br><code>[dd/mm/yyyy, HH:MM:SS] Speaker: message</code><br><code>m/d/yy, HH:MM - Speaker: message</code><br>multi‑line supported · bold yellow highlights · selectable + deletable results (Results tab)<br>Footer hidden for full-height view.</div>`;
+            updateDeleteButtonVisibility();
+        }
+
+        function updateResultCount(count) {
+            if (resultCountBadge) {
+                resultCountBadge.textContent = `${count} message${count !== 1 ? 's' : ''}`;
+            }
+        }
+
+        function updateDeleteButtonVisibility() {
+            const count = selectedMessages.size;
+            if (count > 0) {
+                deleteSelectedBtn.classList.add('visible');
+                deleteSelectedBtn.textContent = `🗑 Delete selected (${count})`;
+                deleteSelectedBtn.disabled = false;
             } else {
-                resultsContainer.innerHTML = `<div class="empty-state">✨ No results. Try different search criteria.</div>`;
+                deleteSelectedBtn.classList.remove('visible');
+                deleteSelectedBtn.textContent = `🗑 Delete selected`;
+                deleteSelectedBtn.disabled = true;
             }
-            return;
         }
-        
-        const fragment = document.createDocumentFragment();
-        const countSpan = document.createElement('div');
-        countSpan.className = 'result-count-badge';
-        countSpan.textContent = `${messages.length} message${messages.length !== 1 ? 's' : ''}`;
-        fragment.appendChild(countSpan);
-        
-        for (let idx = 0; idx < messages.length; idx++) {
-            const msg = messages[idx];
-            const div = document.createElement('div');
-            div.className = 'convo-item';
-            div.setAttribute('data-msg-idx', idx);
-            
-            const meta = document.createElement('div');
-            meta.className = 'msg-meta';
-            const dtSpan = document.createElement('span');
-            dtSpan.className = 'msg-datetime';
-            dtSpan.textContent = `${msg.displayDate || msg.rawDate} ${msg.displayTime || msg.rawTime}`;
-            const spSpan = document.createElement('span');
-            spSpan.className = 'msg-speaker';
-            spSpan.textContent = msg.speaker;
-            meta.appendChild(dtSpan);
-            meta.appendChild(spSpan);
-            
-            const textDiv = document.createElement('div');
-            textDiv.className = 'msg-text';
-            const highlightedMsg = highlightText(msg.message, highlightNames);
-            textDiv.innerHTML = highlightedMsg;
-            
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'delete-msg-btn';
-            deleteBtn.innerHTML = '🗑️';
-            deleteBtn.title = 'Remove this message from current results';
-            deleteBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const newDisplayed = currentDisplayedMessages.filter(m => m !== msg);
-                currentDisplayedMessages = newDisplayed;
-                renderResults(currentDisplayedMessages, currentHighlightNames);
+
+        function deleteSelectedMessages() {
+            if (selectedMessages.size === 0) return;
+            // Remove all selected messages from currentDisplayedMessages
+            const toDelete = new Set(selectedMessages);
+            currentDisplayedMessages = currentDisplayedMessages.filter(msg => !toDelete.has(msg));
+            selectedMessages.clear();
+            // Re-render with updated list
+            renderResults(currentDisplayedMessages, currentHighlightNames);
+            updateDeleteButtonVisibility();
+        }
+
+        function renderResults(messages, highlightNames) {
+            if (!messages.length) {
+                if (fileLoaded && parsedMessages.length) {
+                    resultsContainer.innerHTML =
+                        `<div class="empty-state">✨ No messages match current filters. Adjust speaker names or date range.<br>🗑️ Deleted messages only removed from this view (source file untouched).</div>`;
+                } else if (!fileLoaded) {
+                    resultsContainer.innerHTML =
+                        `<div class="empty-state">📂 Upload a chat log to start. Then search → results appear here.<br>Footer hidden on this tab → results use full height.</div>`;
+                } else if (fileLoaded && parsedMessages.length === 0) {
+                    resultsContainer.innerHTML =
+                        `<div class="empty-state">⚠️ No valid messages in file. Check format.</div>`;
+                } else {
+                    resultsContainer.innerHTML =
+                        `<div class="empty-state">✨ No results. Try different search criteria.</div>`;
+                }
+                updateResultCount(0);
+                updateDeleteButtonVisibility();
+                return;
+            }
+
+            // Clear any stale selection references
+            selectedMessages = new Set();
+
+            const fragment = document.createDocumentFragment();
+            const count = messages.length;
+            updateResultCount(count);
+
+            for (let idx = 0; idx < messages.length; idx++) {
+                const msg = messages[idx];
+                const div = document.createElement('div');
+                div.className = 'convo-item';
+                div.setAttribute('data-msg-idx', idx);
+
+                const meta = document.createElement('div');
+                meta.className = 'msg-meta';
+                const dtSpan = document.createElement('span');
+                dtSpan.className = 'msg-datetime';
+                dtSpan.textContent = `${msg.displayDate || msg.rawDate} ${msg.displayTime || msg.rawTime}`;
+                const spSpan = document.createElement('span');
+                spSpan.className = 'msg-speaker';
+                spSpan.textContent = msg.speaker;
+                meta.appendChild(dtSpan);
+                meta.appendChild(spSpan);
+
+                const textDiv = document.createElement('div');
+                textDiv.className = 'msg-text';
+                const highlightedMsg = highlightText(msg.message, highlightNames);
+                textDiv.innerHTML = highlightedMsg;
+
+                // Tiny checkbox
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'msg-select';
+                checkbox.dataset.idx = idx;
+                checkbox.checked = false;
+                checkbox.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        selectedMessages.add(msg);
+                        div.classList.add('selected');
+                    } else {
+                        selectedMessages.delete(msg);
+                        div.classList.remove('selected');
+                    }
+                    updateDeleteButtonVisibility();
+                });
+
+                div.appendChild(meta);
+                div.appendChild(textDiv);
+                div.appendChild(checkbox);
+                fragment.appendChild(div);
+            }
+            resultsContainer.innerHTML = '';
+            resultsContainer.appendChild(fragment);
+            updateDeleteButtonVisibility();
+        }
+
+        function performSearch() {
+            if (!fileLoaded || parsedMessages.length === 0) {
+                resultsContainer.innerHTML =
+                    `<div class="empty-state">⚠️ please upload a valid chat log first.<br>formats: <code>[15/07/2025, 23:11:51] Samuel EA: text</code><br>or <code>6/6/26, 22:16 - Warriblood EA: text</code></div>`;
+                switchTab('results');
+                return;
+            }
+
+            let name1Raw = name1Input.value.trim();
+            if (name1Raw === "") {
+                resultsContainer.innerHTML =
+                    `<div class="empty-state">❌ enter SPEAKER 1 (required)</div>`;
+                switchTab('results');
+                return;
+            }
+
+            const name2Raw = name2Input.value.trim();
+            const startDateRaw = startDateInput.value.trim();
+            const endDateRaw = endDateInput.value.trim();
+
+            let startDayMs = null,
+                endDayMs = null;
+            if (startDateRaw !== "") {
+                startDayMs = parseDateUniversal(startDateRaw);
+                if (startDayMs === null) {
+                    resultsContainer.innerHTML =
+                        `<div class="empty-state">❌ invalid FROM date → use dd/mm/yyyy or m/d/yy</div>`;
+                    switchTab('results');
+                    return;
+                }
+            }
+            if (endDateRaw !== "") {
+                endDayMs = parseDateUniversal(endDateRaw);
+                if (endDayMs === null) {
+                    resultsContainer.innerHTML =
+                        `<div class="empty-state">❌ invalid TO date → use dd/mm/yyyy or m/d/yy</div>`;
+                    switchTab('results');
+                    return;
+                }
+            }
+            if (startDayMs !== null && endDayMs !== null && startDayMs > endDayMs) {
+                resultsContainer.innerHTML =
+                    `<div class="empty-state">⛔ from date cannot be after to date</div>`;
+                switchTab('results');
+                return;
+            }
+
+            const name1Lower = name1Raw.toLowerCase();
+            const name2Lower = name2Raw.toLowerCase();
+
+            let filtered = parsedMessages.filter(msg => {
+                const sp = msg.speakerLower;
+                if (name2Raw === "") return sp === name1Lower;
+                return sp === name1Lower || sp === name2Lower;
             });
-            
-            div.appendChild(meta);
-            div.appendChild(textDiv);
-            div.appendChild(deleteBtn);
-            fragment.appendChild(div);
-        }
-        resultsContainer.innerHTML = '';
-        resultsContainer.appendChild(fragment);
-    }
 
-    function performSearch() {
-        if (!fileLoaded || parsedMessages.length === 0) {
-            resultsContainer.innerHTML = `<div class="empty-state">⚠️ please upload a valid chat log first.<br>formats: <code>[15/07/2025, 23:11:51] Samuel EA: text</code><br>or <code>6/6/26, 22:16 - Warriblood EA: text</code></div>`;
-            switchTab('results');
-            return;
-        }
-
-        let name1Raw = name1Input.value.trim();
-        if (name1Raw === "") {
-            resultsContainer.innerHTML = `<div class="empty-state">❌ enter SPEAKER 1 (required)</div>`;
-            switchTab('results');
-            return;
-        }
-
-        const name2Raw = name2Input.value.trim();
-        const startDateRaw = startDateInput.value.trim();
-        const endDateRaw = endDateInput.value.trim();
-
-        let startDayMs = null, endDayMs = null;
-        if (startDateRaw !== "") {
-            startDayMs = parseDateUniversal(startDateRaw);
-            if (startDayMs === null) {
-                resultsContainer.innerHTML = `<div class="empty-state">❌ invalid FROM date → use dd/mm/yyyy or m/d/yy</div>`;
-                switchTab('results');
-                return;
+            if (startDayMs !== null || endDayMs !== null) {
+                filtered = filtered.filter(msg => {
+                    const d = msg.dayTimestamp;
+                    if (startDayMs !== null && d < startDayMs) return false;
+                    if (endDayMs !== null && d > endDayMs) return false;
+                    return true;
+                });
             }
-        }
-        if (endDateRaw !== "") {
-            endDayMs = parseDateUniversal(endDateRaw);
-            if (endDayMs === null) {
-                resultsContainer.innerHTML = `<div class="empty-state">❌ invalid TO date → use dd/mm/yyyy or m/d/yy</div>`;
-                switchTab('results');
-                return;
-            }
-        }
-        if (startDayMs !== null && endDayMs !== null && startDayMs > endDayMs) {
-            resultsContainer.innerHTML = `<div class="empty-state">⛔ from date cannot be after to date</div>`;
+
+            filtered.sort((a, b) => a.fullTimestamp - b.fullTimestamp);
+
+            const highlightSet = new Set();
+            if (name1Raw) highlightSet.add(name1Raw);
+            if (name2Raw) highlightSet.add(name2Raw);
+            const highlightNames = Array.from(highlightSet);
+
+            currentDisplayedMessages = filtered;
+            currentHighlightNames = highlightNames;
+            selectedMessages.clear();
+            renderResults(currentDisplayedMessages, currentHighlightNames);
             switchTab('results');
-            return;
         }
 
-        const name1Lower = name1Raw.toLowerCase();
-        const name2Lower = name2Raw.toLowerCase();
+        function clearFileAndReset() {
+            resetFileState();
+            fileInput.value = '';
+            name1Input.value = '';
+            name2Input.value = '';
+            startDateInput.value = '';
+            endDateInput.value = '';
+            resultsContainer.innerHTML =
+                `<div class="empty-state">📂 file cleared. upload new log.</div>`;
+            parseStatsSpan.innerHTML = `📄 no file`;
+            fileNameSpan.textContent = "no file selected";
+            fileLoaded = false;
+            parsedMessages = [];
+            currentDisplayedMessages = [];
+            currentHighlightNames = [];
+            selectedMessages.clear();
+            updateDeleteButtonVisibility();
+            switchTab('search');
+        }
 
-        let filtered = parsedMessages.filter(msg => {
-            const sp = msg.speakerLower;
-            if (name2Raw === "") return sp === name1Lower;
-            return sp === name1Lower || sp === name2Lower;
+        // Event listeners
+        uploadBtn.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) loadFile(file);
+            else resetFileState();
+        });
+        clearFileBtn.addEventListener('click', clearFileAndReset);
+        searchBtn.addEventListener('click', performSearch);
+        deleteSelectedBtn.addEventListener('click', deleteSelectedMessages);
+
+        [name1Input, name2Input, startDateInput, endDateInput].forEach(field => {
+            field.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    performSearch();
+                }
+            });
         });
 
-        if (startDayMs !== null || endDayMs !== null) {
-            filtered = filtered.filter(msg => {
-                const d = msg.dayTimestamp;
-                if (startDayMs !== null && d < startDayMs) return false;
-                if (endDayMs !== null && d > endDayMs) return false;
-                return true;
-            });
-        }
-
-        filtered.sort((a,b) => a.fullTimestamp - b.fullTimestamp);
-        
-        const highlightSet = new Set();
-        if (name1Raw) highlightSet.add(name1Raw);
-        if (name2Raw) highlightSet.add(name2Raw);
-        const highlightNames = Array.from(highlightSet);
-        
-        currentDisplayedMessages = filtered;
-        currentHighlightNames = highlightNames;
-        renderResults(currentDisplayedMessages, currentHighlightNames);
-        switchTab('results');
-    }
-
-    function clearFileAndReset() {
-        resetFileState();
-        fileInput.value = '';
-        name1Input.value = '';
-        name2Input.value = '';
-        startDateInput.value = '';
-        endDateInput.value = '';
-        resultsContainer.innerHTML = `<div class="empty-state">📂 file cleared. upload new log.</div>`;
-        parseStatsSpan.innerHTML = `📄 no file`;
-        fileNameSpan.textContent = "no file selected";
-        fileLoaded = false;
-        parsedMessages = [];
-        currentDisplayedMessages = [];
-        currentHighlightNames = [];
-        switchTab('search');
-    }
-
-    uploadBtn.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) loadFile(file);
-        else resetFileState();
-    });
-    clearFileBtn.addEventListener('click', clearFileAndReset);
-    searchBtn.addEventListener('click', performSearch);
-
-    [name1Input, name2Input, startDateInput, endDateInput].forEach(field => {
-        field.addEventListener('keypress', (e) => { if (e.key === 'Enter') { e.preventDefault(); performSearch(); } });
-    });
-</script>
+        // initial state
+        resetSearchResults();
+        updateDeleteButtonVisibility();
+    </script>
 </body>
 </html>
