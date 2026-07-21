@@ -467,7 +467,6 @@
             }
         }
 
-        /* restore indicator */
         .restore-badge {
             background: #1e293b;
             border: 1px solid #3b82f6;
@@ -570,7 +569,8 @@
         let currentDisplayedMessages = [];
         let currentHighlightNames = [];
         let selectedMessages = new Set();
-        let rawFileContent = null; // for persistence
+        let rawFileContent = null;
+        let restoreInProgress = false; // prevent save during restore
 
         // DOM elements
         const fileInput = document.getElementById('fileInput');
@@ -593,7 +593,6 @@
         const STORAGE_KEY = 'edge_searcher_state';
 
         function getMessageId(msg) {
-            // stable unique ID based on message content
             const content = `${msg.speaker}|${msg.rawDate}|${msg.rawTime}|${msg.message}`;
             let hash = 0;
             for (let i = 0; i < content.length; i++) {
@@ -605,12 +604,12 @@
         }
 
         function saveState() {
+            if (restoreInProgress) return;
             try {
                 const selectedIds = [];
                 for (const msg of selectedMessages) {
                     selectedIds.push(getMessageId(msg));
                 }
-
                 const state = {
                     fileContent: rawFileContent || null,
                     fileName: fileNameSpan.textContent !== 'no file selected' ? fileNameSpan.textContent : null,
@@ -620,12 +619,10 @@
                     endDate: endDateInput.value,
                     selectedIds: selectedIds,
                     activeTab: document.querySelector('.tab-btn.active')?.dataset?.tab || 'search',
-                    // store the current displayed messages so we can re-run search on load
-                    // we'll re-run search instead of storing results
                 };
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             } catch (e) {
-                // localStorage full or other error — silently ignore
+                // ignore
                 console.warn('saveState error:', e);
             }
         }
@@ -969,7 +966,6 @@
                 return;
             }
 
-            // rebuild selectedMessages from scratch for this render
             selectedMessages = new Set();
 
             const fragment = document.createDocumentFragment();
@@ -1102,18 +1098,15 @@
             currentHighlightNames = highlightNames;
             selectedMessages.clear();
 
-            // restore selections from saved state after rendering
             renderResults(currentDisplayedMessages, currentHighlightNames);
 
-            // now restore saved selections
+            // restore saved selections
             const saved = loadState();
             if (saved && saved.selectedIds && saved.selectedIds.length) {
                 const savedIds = new Set(saved.selectedIds);
                 const msgEls = resultsContainer.querySelectorAll('.convo-item');
-                // iterate over messages and check if their ID is in savedIds
-                const msgs = currentDisplayedMessages;
-                for (let i = 0; i < msgs.length; i++) {
-                    const msg = msgs[i];
+                for (let i = 0; i < currentDisplayedMessages.length; i++) {
+                    const msg = currentDisplayedMessages[i];
                     const id = getMessageId(msg);
                     if (savedIds.has(id)) {
                         selectedMessages.add(msg);
@@ -1223,53 +1216,83 @@
             const saved = loadState();
             if (!saved) return false;
 
+            restoreInProgress = true;
             let restored = false;
 
-            // restore file content
-            if (saved.fileContent && saved.fileName) {
-                try {
-                    const { messages, skippedLines } = parseFileWithContinuations(saved.fileContent);
+            try {
+                // restore inputs first (always)
+                if (saved.name1 !== undefined) name1Input.value = saved.name1 || '';
+                if (saved.name2 !== undefined) name2Input.value = saved.name2 || '';
+                if (saved.startDate !== undefined) startDateInput.value = saved.startDate || '';
+                if (saved.endDate !== undefined) endDateInput.value = saved.endDate || '';
+
+                // restore file content if present
+                if (saved.fileContent && saved.fileName) {
+                    const content = saved.fileContent;
+                    const { messages, skippedLines } = parseFileWithContinuations(content);
                     if (messages.length > 0) {
                         parsedMessages = messages;
                         fileLoaded = true;
-                        rawFileContent = saved.fileContent;
+                        rawFileContent = content;
                         fileNameSpan.textContent = saved.fileName;
                         updateStatsDisplay(parsedMessages.length, skippedLines);
                         resetSearchResults();
                         restoreIndicator.style.display = 'inline-block';
                         restored = true;
+                    } else {
+                        // file content existed but no valid messages – show error
+                        fileLoaded = false;
+                        rawFileContent = null;
+                        fileNameSpan.textContent = saved.fileName + ' (invalid)';
+                        updateStatsDisplay(0, 0);
+                        resetSearchResults();
+                        restoreIndicator.style.display = 'none';
                     }
-                } catch (e) { /* ignore */ }
-            }
-
-            // restore input values
-            if (saved.name1) name1Input.value = saved.name1;
-            if (saved.name2) name2Input.value = saved.name2;
-            if (saved.startDate) startDateInput.value = saved.startDate;
-            if (saved.endDate) endDateInput.value = saved.endDate;
-
-            // if we have a file loaded, run search to restore results
-            if (fileLoaded && parsedMessages.length > 0) {
-                // we need to run search but we don't want to save state during restore
-                // and we want to restore selections after
-                const name1 = name1Input.value.trim();
-                if (name1) {
-                    // perform search without saving
-                    performSearch(false);
-                    // selections are restored inside performSearch from saved state
-                    restored = true;
-                } else {
-                    // just show the file loaded state
-                    resultsContainer.innerHTML =
-                        `<div class="empty-state">📄 File restored (${parsedMessages.length} messages).<br>Enter speaker names and search.</div>`;
-                    updateResultCount(0);
-                    updateDeleteButtonVisibility();
                 }
-            }
 
-            // restore active tab
-            if (saved.activeTab) {
-                switchTab(saved.activeTab, false);
+                // if we have a file loaded, and speaker1 is set, run search to restore results
+                if (fileLoaded && parsedMessages.length > 0) {
+                    const name1 = name1Input.value.trim();
+                    if (name1) {
+                        performSearch(false); // this will also restore selections from saved state
+                    } else {
+                        // file loaded but no speaker1, just show file loaded state
+                        resultsContainer.innerHTML =
+                            `<div class="empty-state">📄 File restored (${parsedMessages.length} messages).<br>Enter speaker names and search.</div>`;
+                        updateResultCount(0);
+                        updateDeleteButtonVisibility();
+                    }
+                }
+
+                // restore active tab
+                if (saved.activeTab) {
+                    switchTab(saved.activeTab, false);
+                }
+
+                // ensure footer visibility
+                const activeTab = document.querySelector('.tab-btn.active')?.dataset?.tab || 'search';
+                if (activeTab === 'results') {
+                    if (mainFooter) mainFooter.classList.add('hide-footer');
+                } else {
+                    if (mainFooter) mainFooter.classList.remove('hide-footer');
+                }
+
+                // if nothing restored, return false
+                if (!restored && !saved.name1 && !saved.name2 && !saved.startDate && !saved.endDate) {
+                    restored = false; // no meaningful state
+                } else {
+                    restored = true;
+                }
+
+            } catch (e) {
+                console.warn('restoreFromSaved error:', e);
+                restored = false;
+            } finally {
+                restoreInProgress = false;
+                // if we restored something, save state again to ensure consistency (but avoid recursion)
+                if (restored) {
+                    // don't save immediately, let user interactions save
+                }
             }
 
             return restored;
@@ -1286,16 +1309,16 @@
         searchBtn.addEventListener('click', () => performSearch(true));
         deleteSelectedBtn.addEventListener('click', deleteSelectedMessages);
 
+        // Save on any input change, regardless of fileLoaded
         [name1Input, name2Input, startDateInput, endDateInput].forEach(field => {
+            field.addEventListener('input', () => {
+                saveState();
+            });
             field.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     performSearch(true);
                 }
-            });
-            field.addEventListener('input', () => {
-                // auto-save input values on change
-                if (fileLoaded) saveState();
             });
         });
 
@@ -1308,7 +1331,7 @@
         const restored = restoreFromSaved();
 
         if (!restored) {
-            // show default empty state
+            // show default empty state with persistence notice
             resultsContainer.innerHTML =
                 `<div class="empty-state">📂 upload .txt → supports two formats:<br><code>[dd/mm/yyyy, HH:MM:SS] Speaker: message</code><br><code>m/d/yy, HH:MM - Speaker: message</code><br>multi‑line supported · bold yellow highlights · selectable + deletable results (Results tab)<br>Footer hidden for full-height view.<br><span style="color:#34d399;">💾 all inputs &amp; selections auto‑saved</span></div>`;
         }
@@ -1321,8 +1344,7 @@
             if (mainFooter) mainFooter.classList.remove('hide-footer');
         }
 
-        // save state periodically when user interacts with checkboxes (already handled in render)
-        // also save on beforeunload
+        // save on page unload
         window.addEventListener('beforeunload', () => {
             saveState();
         });
