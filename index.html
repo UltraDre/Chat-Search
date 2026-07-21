@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
     <title>edge searcher · tabbed results · multi‑select delete</title>
     <style>
         * {
@@ -30,7 +30,6 @@
             flex-direction: column;
         }
 
-        /* ========= TAB BAR ========= */
         .tab-bar {
             display: flex;
             gap: 0.5rem;
@@ -38,6 +37,7 @@
             border-bottom: 1px solid #2d3a5e;
             padding-bottom: 0;
         }
+
         .tab-btn {
             background: #0f172a;
             border: none;
@@ -54,6 +54,7 @@
             border-bottom: none;
             margin-bottom: -1px;
         }
+
         .tab-btn.active {
             background: #1e293b;
             color: #facc15;
@@ -61,34 +62,38 @@
             border-bottom-color: #1e293b;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
+
         .tab-btn:first-child {
             border-top-left-radius: 28px;
         }
         .tab-btn:last-child {
             border-top-right-radius: 28px;
         }
+
         .tab-btn:hover:not(.active) {
             background: #111827;
             color: #cbd5e1;
             border-color: #475569;
         }
 
-        /* ========= PANELS ========= */
         .tab-panels {
             width: 100%;
             flex: 1;
             display: flex;
             flex-direction: column;
         }
+
         .tab-panel {
             display: none;
             animation: fadeIn 0.2s ease;
             flex: 1;
         }
+
         .tab-panel.active-panel {
             display: flex;
             flex-direction: column;
         }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -100,7 +105,6 @@
             }
         }
 
-        /* ========= SEARCH PANEL CARD ========= */
         .control-card {
             background: #1e293b;
             border-radius: 28px;
@@ -109,6 +113,7 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
             border: 1px solid #334155;
         }
+
         .flex-between {
             display: flex;
             justify-content: space-between;
@@ -117,6 +122,7 @@
             gap: 0.8rem;
             margin-bottom: 0.75rem;
         }
+
         h1 {
             font-size: 1.35rem;
             font-weight: 600;
@@ -126,6 +132,7 @@
             -webkit-background-clip: text;
             color: transparent;
         }
+
         .sub {
             font-size: 0.7rem;
             color: #94a3b8;
@@ -133,6 +140,7 @@
             padding-left: 8px;
             margin-top: 2px;
         }
+
         .stats-badge {
             background: #0f172a;
             border-radius: 40px;
@@ -142,6 +150,7 @@
             color: #a5f3fc;
             border: 1px solid #2d3a5e;
         }
+
         .file-zone {
             display: flex;
             align-items: center;
@@ -149,6 +158,7 @@
             flex-wrap: wrap;
             margin: 0.8rem 0 0.6rem 0;
         }
+
         .file-label,
         button {
             font-size: 0.8rem;
@@ -161,16 +171,19 @@
             cursor: pointer;
             transition: 0.2s;
         }
+
         .file-label:hover,
         button:hover {
             background: #2d3a5e;
             border-color: #5b6e8c;
             transform: translateY(-1px);
         }
+
         button.secondary {
             background: #0f172a;
             border-color: #475569;
         }
+
         #fileName {
             font-size: 0.7rem;
             background: #0f172a;
@@ -178,6 +191,7 @@
             border-radius: 40px;
             color: #cbd5e1;
         }
+
         input {
             background: #0f172a;
             border: 1px solid #334155;
@@ -189,20 +203,24 @@
             outline: none;
             transition: 0.15s;
         }
+
         input:focus {
             border-color: #60a5fa;
             box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
         }
+
         .flex-row {
             display: flex;
             flex-wrap: wrap;
             gap: 0.8rem;
             margin: 0.8rem 0 0.2rem;
         }
+
         .field-group {
             flex: 1;
             min-width: 130px;
         }
+
         label {
             font-size: 0.65rem;
             font-weight: 600;
@@ -212,6 +230,7 @@
             margin-bottom: 4px;
             display: block;
         }
+
         .format-example {
             background: #0f172a;
             border-radius: 18px;
@@ -222,6 +241,7 @@
             font-family: monospace;
             color: #cbd5e6;
         }
+
         code {
             background: #00000044;
             padding: 2px 6px;
@@ -229,7 +249,6 @@
             font-size: 0.7rem;
         }
 
-        /* ========= RESULTS TAB (raw, full height) ========= */
         .results-raw {
             width: 100%;
             flex: 1;
@@ -238,7 +257,6 @@
             min-height: 0;
         }
 
-        /* results header with count + delete button */
         .results-header {
             display: flex;
             align-items: center;
@@ -247,6 +265,7 @@
             margin-bottom: 12px;
             padding: 0 0.2rem;
         }
+
         .result-count-badge {
             background: #0f172a;
             border-radius: 40px;
@@ -258,6 +277,7 @@
             display: inline-block;
             align-self: flex-start;
         }
+
         .delete-selected-btn {
             background: #4c1d2b;
             border: 1px solid #7f1d3a;
@@ -271,15 +291,18 @@
             display: none;
             align-self: flex-start;
         }
+
         .delete-selected-btn:hover {
             background: #7f1d3a;
             border-color: #b91c3a;
             color: #fff;
             transform: translateY(-1px);
         }
+
         .delete-selected-btn.visible {
             display: inline-block;
         }
+
         .delete-selected-btn:disabled {
             opacity: 0.4;
             cursor: not-allowed;
@@ -295,6 +318,7 @@
             padding: 0.2rem 0.2rem 0.2rem 0;
             max-height: none;
         }
+
         .convo-item {
             background: #0f172a;
             border: 1px solid #2d3a5e;
@@ -304,15 +328,18 @@
             position: relative;
             padding-right: 44px;
         }
+
         .convo-item:hover {
             background: #1e2a3a;
             border-color: #5b6e8c;
         }
+
         .convo-item.selected {
             border-color: #60a5fa;
             background: #1a2744;
             box-shadow: 0 0 0 1px #60a5fa44;
         }
+
         .msg-meta {
             display: flex;
             flex-wrap: wrap;
@@ -321,6 +348,7 @@
             margin-bottom: 6px;
             font-size: 0.7rem;
         }
+
         .msg-datetime {
             font-family: 'JetBrains Mono', monospace;
             background: #00000033;
@@ -329,6 +357,7 @@
             font-weight: 500;
             color: #7dd3fc;
         }
+
         .msg-speaker {
             font-weight: 700;
             background: #111827;
@@ -337,6 +366,7 @@
             color: #facc15;
             font-size: 0.7rem;
         }
+
         .msg-text {
             font-size: 0.8rem;
             line-height: 1.45;
@@ -344,6 +374,7 @@
             white-space: pre-wrap;
             word-break: break-word;
         }
+
         .msg-text mark {
             background: none;
             color: #facc15;
@@ -353,7 +384,6 @@
             box-shadow: none;
         }
 
-        /* ===== tiny checkbox ===== */
         .msg-select {
             position: absolute;
             top: 12px;
@@ -372,10 +402,12 @@
             appearance: auto;
             -webkit-appearance: auto;
         }
+
         .msg-select:hover {
             border-color: #93c5fd;
             transform: scale(1.1);
         }
+
         .msg-select:checked {
             accent-color: #60a5fa;
             border-color: #60a5fa;
@@ -391,6 +423,7 @@
             border: 1px solid #2d3a5e;
             margin: 0.2rem 0;
         }
+
         footer {
             text-align: center;
             font-size: 0.6rem;
@@ -400,6 +433,7 @@
             padding-top: 1rem;
             transition: opacity 0.2s;
         }
+
         footer.hide-footer {
             display: none;
         }
@@ -432,6 +466,19 @@
                 font-size: 0.75rem;
             }
         }
+
+        /* restore indicator */
+        .restore-badge {
+            background: #1e293b;
+            border: 1px solid #3b82f6;
+            border-radius: 40px;
+            padding: 2px 12px;
+            font-size: 0.6rem;
+            color: #93c5fd;
+            margin-left: 8px;
+            display: inline-block;
+            opacity: 0.7;
+        }
     </style>
 </head>
 <body>
@@ -458,6 +505,7 @@
                         <button class="file-label" id="uploadBtn">📁 choose .txt</button>
                         <span id="fileName">no file selected</span>
                         <button id="clearFileBtn" class="secondary" style="padding: 5px 12px;">🗑 clear</button>
+                        <span id="restoreIndicator" class="restore-badge" style="display:none;">↻ restored</span>
                     </div>
 
                     <div class="flex-row">
@@ -493,11 +541,12 @@
                         <code>6/6/26, 22:16 - Warriblood EA: Waiting for you</code><br>
                         <span style="color:#facc15; font-weight:500;">✨ bold yellow matches · ☑️ select multiple with tiny checkboxes · 🗑️ delete selected</span><br>
                         <span style="color:#7dd3fc;">📌 Results appear in "Search Results" tab → selectable, deletable, highlighted, no footer</span>
+                        <span style="color:#34d399; display:inline-block; margin-left:12px;">💾 all inputs &amp; selections auto‑saved</span>
                     </div>
                 </div>
             </div>
 
-            <!-- TAB 2: RESULTS PANEL (raw, no card, footer hidden) -->
+            <!-- TAB 2: RESULTS PANEL -->
             <div class="tab-panel" id="resultsPanel">
                 <div class="results-raw">
                     <div class="results-header" id="resultsHeader">
@@ -511,7 +560,7 @@
             </div>
         </div>
 
-        <footer id="mainFooter">dual format: [dd/mm/yyyy, HH:MM:SS] or m/d/yy, HH:MM · continuation lines merged · speaker names = bold yellow · multi‑select delete · tabbed results</footer>
+        <footer id="mainFooter">dual format: [dd/mm/yyyy, HH:MM:SS] or m/d/yy, HH:MM · continuation lines merged · speaker names = bold yellow · multi‑select delete · tabbed results · 💾 auto‑persist</footer>
     </div>
 
     <script>
@@ -521,6 +570,7 @@
         let currentDisplayedMessages = [];
         let currentHighlightNames = [];
         let selectedMessages = new Set();
+        let rawFileContent = null; // for persistence
 
         // DOM elements
         const fileInput = document.getElementById('fileInput');
@@ -537,17 +587,75 @@
         const mainFooter = document.getElementById('mainFooter');
         const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
         const resultCountBadge = document.getElementById('resultCountBadge');
+        const restoreIndicator = document.getElementById('restoreIndicator');
 
-        // Tab management
+        // ---------- PERSISTENCE ----------
+        const STORAGE_KEY = 'edge_searcher_state';
+
+        function getMessageId(msg) {
+            // stable unique ID based on message content
+            const content = `${msg.speaker}|${msg.rawDate}|${msg.rawTime}|${msg.message}`;
+            let hash = 0;
+            for (let i = 0; i < content.length; i++) {
+                const char = content.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return `${msg.speaker}|${msg.rawDate}|${msg.rawTime}|${hash}`;
+        }
+
+        function saveState() {
+            try {
+                const selectedIds = [];
+                for (const msg of selectedMessages) {
+                    selectedIds.push(getMessageId(msg));
+                }
+
+                const state = {
+                    fileContent: rawFileContent || null,
+                    fileName: fileNameSpan.textContent !== 'no file selected' ? fileNameSpan.textContent : null,
+                    name1: name1Input.value,
+                    name2: name2Input.value,
+                    startDate: startDateInput.value,
+                    endDate: endDateInput.value,
+                    selectedIds: selectedIds,
+                    activeTab: document.querySelector('.tab-btn.active')?.dataset?.tab || 'search',
+                    // store the current displayed messages so we can re-run search on load
+                    // we'll re-run search instead of storing results
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (e) {
+                // localStorage full or other error — silently ignore
+                console.warn('saveState error:', e);
+            }
+        }
+
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return null;
+                return JSON.parse(raw);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function clearSavedState() {
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+            } catch (e) { /* ignore */ }
+        }
+
+        // ---------- TAB MANAGEMENT ----------
         const tabBtns = document.querySelectorAll('.tab-btn');
         const panels = document.querySelectorAll('.tab-panel');
 
-        function switchTab(tabId) {
-            panels.forEach(panel => panel.classList.remove('active-panel'));
-            tabBtns.forEach(btn => btn.classList.remove('active'));
+        function switchTab(tabId, save = true) {
+            panels.forEach(p => p.classList.remove('active-panel'));
+            tabBtns.forEach(b => b.classList.remove('active'));
             const activePanel = document.getElementById(`${tabId}Panel`);
             if (activePanel) activePanel.classList.add('active-panel');
-            const activeBtn = Array.from(tabBtns).find(btn => btn.dataset.tab === tabId);
+            const activeBtn = Array.from(tabBtns).find(b => b.dataset.tab === tabId);
             if (activeBtn) activeBtn.classList.add('active');
 
             if (tabId === 'results') {
@@ -555,22 +663,22 @@
             } else {
                 if (mainFooter) mainFooter.classList.remove('hide-footer');
             }
-            // when switching to results, update button visibility
             if (tabId === 'results') {
                 updateDeleteButtonVisibility();
             }
+            if (save) saveState();
         }
 
         tabBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 const tabName = btn.dataset.tab;
-                if (tabName === 'search') switchTab('search');
-                else if (tabName === 'results') switchTab('results');
+                switchTab(tabName, true);
             });
         });
 
         if (mainFooter) mainFooter.classList.remove('hide-footer');
 
+        // ---------- HELPERS ----------
         function escapeRegex(str) {
             return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
@@ -651,7 +759,7 @@
             return line.replace(/[\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]/g, ' ');
         }
 
-        // ---------- FORMAT 1: [dd/mm/yyyy, HH:MM:SS] Speaker: message ----------
+        // ---------- FORMAT 1 ----------
         function parseNewFormat(line) {
             let cleaned = normaliseWhitespace(line);
             const regex = /^\[(\d{1,2}\/\d{1,2}\/\d{4}),\s+(\d{1,2}:\d{2}:\d{2})\]\s+([^:]+):\s*(.*)$/;
@@ -698,7 +806,7 @@
             };
         }
 
-        // ---------- FORMAT 2: m/d/yy, HH:MM - Speaker: message ----------
+        // ---------- FORMAT 2 ----------
         function parseLegacyFormat(line) {
             let cleaned = normaliseWhitespace(line);
             const regex = /^(\d{1,2}\/\d{1,2}\/\d{2}),\s+(\d{1,2}:\d{2})\s+-\s+([^:]+):\s*(.*)$/;
@@ -755,7 +863,6 @@
             const lines = text.split(/\r?\n/);
             const messages = [];
             let currentMessage = null;
-            let skippedLines = 0;
 
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i];
@@ -767,8 +874,6 @@
                 } else {
                     if (currentMessage && line.trim() !== "") {
                         currentMessage.continuationLines.push(line);
-                    } else if (!currentMessage && line.trim() !== "") {
-                        skippedLines++;
                     } else if (currentMessage && line === "") {
                         currentMessage.continuationLines.push(line);
                     }
@@ -794,13 +899,14 @@
                     displayTime: msg.displayTime || msg.rawTime
                 });
             }
-            return { messages: finalMessages, skippedLines };
+            return { messages: finalMessages, skippedLines: 0 };
         }
 
+        // ---------- UI UPDATES ----------
         function updateStatsDisplay(count, skipped = 0) {
             if (count === 0 && !fileLoaded) parseStatsSpan.innerHTML = `📄 no file`;
-            else if (count === 0 && fileLoaded) parseStatsSpan.innerHTML = `⚠️ ${skipped} invalid lines`;
-            else parseStatsSpan.innerHTML = `✅ ${count} msgs${skipped ? ` · +${skipped} orphan` : ''}`;
+            else if (count === 0 && fileLoaded) parseStatsSpan.innerHTML = `⚠️ 0 messages`;
+            else parseStatsSpan.innerHTML = `✅ ${count} msgs`;
         }
 
         function resetSearchResults() {
@@ -823,51 +929,6 @@
             updateDeleteButtonVisibility();
         }
 
-        function loadFile(file) {
-            if (!file) { resetFileState(); return; }
-            fileNameSpan.textContent = file.name;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const content = e.target.result;
-                const { messages, skippedLines } = parseFileWithContinuations(content);
-                parsedMessages = messages;
-                fileLoaded = true;
-                updateStatsDisplay(parsedMessages.length, skippedLines);
-                currentDisplayedMessages = [];
-                currentHighlightNames = [];
-                selectedMessages.clear();
-                resetSearchResults();
-                if (parsedMessages.length === 0) {
-                    resultsContainer.innerHTML =
-                        `<div class="empty-state">⚠️ No valid messages found.<br>Use: <code>[15/07/2025, 23:11:51] Samuel EA: message</code><br>or <code>6/6/26, 22:16 - Warriblood EA: message</code><br>Continuation lines are merged automatically.</div>`;
-                } else {
-                    if (resultsContainer) {
-                        resultsContainer.innerHTML =
-                            `<div class="empty-state">📄 File loaded (${parsedMessages.length} messages).<br>Go to Search tab, enter names + date range → click Search.<br>Results shown here with ☑️ select + 🗑️ delete selected. No footer on this tab.</div>`;
-                    }
-                }
-                updateDeleteButtonVisibility();
-            };
-            reader.onerror = () => { alert("file read error");
-                resetFileState(); };
-            reader.readAsText(file, "UTF-8");
-        }
-
-        function resetFileState() {
-            parsedMessages = [];
-            fileLoaded = false;
-            fileNameSpan.textContent = "no file selected";
-            updateStatsDisplay(0, 0);
-            fileInput.value = "";
-            currentDisplayedMessages = [];
-            currentHighlightNames = [];
-            selectedMessages.clear();
-            resetSearchResults();
-            resultsContainer.innerHTML =
-                `<div class="empty-state">📂 upload .txt → supports two formats:<br><code>[dd/mm/yyyy, HH:MM:SS] Speaker: message</code><br><code>m/d/yy, HH:MM - Speaker: message</code><br>multi‑line supported · bold yellow highlights · selectable + deletable results (Results tab)<br>Footer hidden for full-height view.</div>`;
-            updateDeleteButtonVisibility();
-        }
-
         function updateResultCount(count) {
             if (resultCountBadge) {
                 resultCountBadge.textContent = `${count} message${count !== 1 ? 's' : ''}`;
@@ -887,17 +948,7 @@
             }
         }
 
-        function deleteSelectedMessages() {
-            if (selectedMessages.size === 0) return;
-            // Remove all selected messages from currentDisplayedMessages
-            const toDelete = new Set(selectedMessages);
-            currentDisplayedMessages = currentDisplayedMessages.filter(msg => !toDelete.has(msg));
-            selectedMessages.clear();
-            // Re-render with updated list
-            renderResults(currentDisplayedMessages, currentHighlightNames);
-            updateDeleteButtonVisibility();
-        }
-
+        // ---------- RENDER RESULTS ----------
         function renderResults(messages, highlightNames) {
             if (!messages.length) {
                 if (fileLoaded && parsedMessages.length) {
@@ -918,7 +969,7 @@
                 return;
             }
 
-            // Clear any stale selection references
+            // rebuild selectedMessages from scratch for this render
             selectedMessages = new Set();
 
             const fragment = document.createDocumentFragment();
@@ -947,7 +998,6 @@
                 const highlightedMsg = highlightText(msg.message, highlightNames);
                 textDiv.innerHTML = highlightedMsg;
 
-                // Tiny checkbox
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.className = 'msg-select';
@@ -962,6 +1012,7 @@
                         div.classList.remove('selected');
                     }
                     updateDeleteButtonVisibility();
+                    saveState();
                 });
 
                 div.appendChild(meta);
@@ -974,11 +1025,12 @@
             updateDeleteButtonVisibility();
         }
 
-        function performSearch() {
+        // ---------- PERFORM SEARCH ----------
+        function performSearch(save = true) {
             if (!fileLoaded || parsedMessages.length === 0) {
                 resultsContainer.innerHTML =
                     `<div class="empty-state">⚠️ please upload a valid chat log first.<br>formats: <code>[15/07/2025, 23:11:51] Samuel EA: text</code><br>or <code>6/6/26, 22:16 - Warriblood EA: text</code></div>`;
-                switchTab('results');
+                switchTab('results', false);
                 return;
             }
 
@@ -986,7 +1038,7 @@
             if (name1Raw === "") {
                 resultsContainer.innerHTML =
                     `<div class="empty-state">❌ enter SPEAKER 1 (required)</div>`;
-                switchTab('results');
+                switchTab('results', false);
                 return;
             }
 
@@ -1001,7 +1053,7 @@
                 if (startDayMs === null) {
                     resultsContainer.innerHTML =
                         `<div class="empty-state">❌ invalid FROM date → use dd/mm/yyyy or m/d/yy</div>`;
-                    switchTab('results');
+                    switchTab('results', false);
                     return;
                 }
             }
@@ -1010,14 +1062,14 @@
                 if (endDayMs === null) {
                     resultsContainer.innerHTML =
                         `<div class="empty-state">❌ invalid TO date → use dd/mm/yyyy or m/d/yy</div>`;
-                    switchTab('results');
+                    switchTab('results', false);
                     return;
                 }
             }
             if (startDayMs !== null && endDayMs !== null && startDayMs > endDayMs) {
                 resultsContainer.innerHTML =
                     `<div class="empty-state">⛔ from date cannot be after to date</div>`;
-                switchTab('results');
+                switchTab('results', false);
                 return;
             }
 
@@ -1049,8 +1101,87 @@
             currentDisplayedMessages = filtered;
             currentHighlightNames = highlightNames;
             selectedMessages.clear();
+
+            // restore selections from saved state after rendering
             renderResults(currentDisplayedMessages, currentHighlightNames);
-            switchTab('results');
+
+            // now restore saved selections
+            const saved = loadState();
+            if (saved && saved.selectedIds && saved.selectedIds.length) {
+                const savedIds = new Set(saved.selectedIds);
+                const msgEls = resultsContainer.querySelectorAll('.convo-item');
+                // iterate over messages and check if their ID is in savedIds
+                const msgs = currentDisplayedMessages;
+                for (let i = 0; i < msgs.length; i++) {
+                    const msg = msgs[i];
+                    const id = getMessageId(msg);
+                    if (savedIds.has(id)) {
+                        selectedMessages.add(msg);
+                        const el = msgEls[i];
+                        if (el) {
+                            const cb = el.querySelector('.msg-select');
+                            if (cb) cb.checked = true;
+                            el.classList.add('selected');
+                        }
+                    }
+                }
+                updateDeleteButtonVisibility();
+            }
+
+            switchTab('results', false);
+            if (save) saveState();
+        }
+
+        // ---------- FILE LOADING ----------
+        function loadFile(file) {
+            if (!file) { resetFileState(); return; }
+            fileNameSpan.textContent = file.name;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const content = e.target.result;
+                rawFileContent = content;
+                const { messages, skippedLines } = parseFileWithContinuations(content);
+                parsedMessages = messages;
+                fileLoaded = true;
+                updateStatsDisplay(parsedMessages.length, skippedLines);
+                currentDisplayedMessages = [];
+                currentHighlightNames = [];
+                selectedMessages.clear();
+                resetSearchResults();
+                if (parsedMessages.length === 0) {
+                    resultsContainer.innerHTML =
+                        `<div class="empty-state">⚠️ No valid messages found.<br>Use: <code>[15/07/2025, 23:11:51] Samuel EA: message</code><br>or <code>6/6/26, 22:16 - Warriblood EA: message</code><br>Continuation lines are merged automatically.</div>`;
+                } else {
+                    if (resultsContainer) {
+                        resultsContainer.innerHTML =
+                            `<div class="empty-state">📄 File loaded (${parsedMessages.length} messages).<br>Go to Search tab, enter names + date range → click Search.<br>Results shown here with ☑️ select + 🗑️ delete selected. No footer on this tab.</div>`;
+                    }
+                }
+                updateDeleteButtonVisibility();
+                restoreIndicator.style.display = 'inline-block';
+                saveState();
+            };
+            reader.onerror = () => { alert("file read error");
+                resetFileState(); };
+            reader.readAsText(file, "UTF-8");
+        }
+
+        function resetFileState() {
+            parsedMessages = [];
+            fileLoaded = false;
+            rawFileContent = null;
+            fileNameSpan.textContent = "no file selected";
+            updateStatsDisplay(0, 0);
+            fileInput.value = "";
+            currentDisplayedMessages = [];
+            currentHighlightNames = [];
+            selectedMessages.clear();
+            resetSearchResults();
+            resultsContainer.innerHTML =
+                `<div class="empty-state">📂 upload .txt → supports two formats:<br><code>[dd/mm/yyyy, HH:MM:SS] Speaker: message</code><br><code>m/d/yy, HH:MM - Speaker: message</code><br>multi‑line supported · bold yellow highlights · selectable + deletable results (Results tab)<br>Footer hidden for full-height view.</div>`;
+            updateDeleteButtonVisibility();
+            restoreIndicator.style.display = 'none';
+            clearSavedState();
         }
 
         function clearFileAndReset() {
@@ -1066,14 +1197,85 @@
             fileNameSpan.textContent = "no file selected";
             fileLoaded = false;
             parsedMessages = [];
+            rawFileContent = null;
             currentDisplayedMessages = [];
             currentHighlightNames = [];
             selectedMessages.clear();
             updateDeleteButtonVisibility();
-            switchTab('search');
+            restoreIndicator.style.display = 'none';
+            clearSavedState();
+            switchTab('search', false);
         }
 
-        // Event listeners
+        // ---------- DELETE SELECTED ----------
+        function deleteSelectedMessages() {
+            if (selectedMessages.size === 0) return;
+            const toDelete = new Set(selectedMessages);
+            currentDisplayedMessages = currentDisplayedMessages.filter(msg => !toDelete.has(msg));
+            selectedMessages.clear();
+            renderResults(currentDisplayedMessages, currentHighlightNames);
+            updateDeleteButtonVisibility();
+            saveState();
+        }
+
+        // ---------- RESTORE FROM SAVED STATE ----------
+        function restoreFromSaved() {
+            const saved = loadState();
+            if (!saved) return false;
+
+            let restored = false;
+
+            // restore file content
+            if (saved.fileContent && saved.fileName) {
+                try {
+                    const { messages, skippedLines } = parseFileWithContinuations(saved.fileContent);
+                    if (messages.length > 0) {
+                        parsedMessages = messages;
+                        fileLoaded = true;
+                        rawFileContent = saved.fileContent;
+                        fileNameSpan.textContent = saved.fileName;
+                        updateStatsDisplay(parsedMessages.length, skippedLines);
+                        resetSearchResults();
+                        restoreIndicator.style.display = 'inline-block';
+                        restored = true;
+                    }
+                } catch (e) { /* ignore */ }
+            }
+
+            // restore input values
+            if (saved.name1) name1Input.value = saved.name1;
+            if (saved.name2) name2Input.value = saved.name2;
+            if (saved.startDate) startDateInput.value = saved.startDate;
+            if (saved.endDate) endDateInput.value = saved.endDate;
+
+            // if we have a file loaded, run search to restore results
+            if (fileLoaded && parsedMessages.length > 0) {
+                // we need to run search but we don't want to save state during restore
+                // and we want to restore selections after
+                const name1 = name1Input.value.trim();
+                if (name1) {
+                    // perform search without saving
+                    performSearch(false);
+                    // selections are restored inside performSearch from saved state
+                    restored = true;
+                } else {
+                    // just show the file loaded state
+                    resultsContainer.innerHTML =
+                        `<div class="empty-state">📄 File restored (${parsedMessages.length} messages).<br>Enter speaker names and search.</div>`;
+                    updateResultCount(0);
+                    updateDeleteButtonVisibility();
+                }
+            }
+
+            // restore active tab
+            if (saved.activeTab) {
+                switchTab(saved.activeTab, false);
+            }
+
+            return restored;
+        }
+
+        // ---------- EVENT LISTENERS ----------
         uploadBtn.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
@@ -1081,21 +1283,51 @@
             else resetFileState();
         });
         clearFileBtn.addEventListener('click', clearFileAndReset);
-        searchBtn.addEventListener('click', performSearch);
+        searchBtn.addEventListener('click', () => performSearch(true));
         deleteSelectedBtn.addEventListener('click', deleteSelectedMessages);
 
         [name1Input, name2Input, startDateInput, endDateInput].forEach(field => {
             field.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    performSearch();
+                    performSearch(true);
                 }
+            });
+            field.addEventListener('input', () => {
+                // auto-save input values on change
+                if (fileLoaded) saveState();
             });
         });
 
+        // ---------- INIT ----------
         // initial state
         resetSearchResults();
         updateDeleteButtonVisibility();
+
+        // try to restore from saved state
+        const restored = restoreFromSaved();
+
+        if (!restored) {
+            // show default empty state
+            resultsContainer.innerHTML =
+                `<div class="empty-state">📂 upload .txt → supports two formats:<br><code>[dd/mm/yyyy, HH:MM:SS] Speaker: message</code><br><code>m/d/yy, HH:MM - Speaker: message</code><br>multi‑line supported · bold yellow highlights · selectable + deletable results (Results tab)<br>Footer hidden for full-height view.<br><span style="color:#34d399;">💾 all inputs &amp; selections auto‑saved</span></div>`;
+        }
+
+        // ensure footer state matches current tab
+        const activeTab = document.querySelector('.tab-btn.active')?.dataset?.tab || 'search';
+        if (activeTab === 'results') {
+            if (mainFooter) mainFooter.classList.add('hide-footer');
+        } else {
+            if (mainFooter) mainFooter.classList.remove('hide-footer');
+        }
+
+        // save state periodically when user interacts with checkboxes (already handled in render)
+        // also save on beforeunload
+        window.addEventListener('beforeunload', () => {
+            saveState();
+        });
+
+        console.log('🔍 edge searcher ready · 💾 auto-persist enabled');
     </script>
 </body>
 </html>
