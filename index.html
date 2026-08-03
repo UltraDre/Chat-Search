@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-    <title>edge searcher · tabbed results · multi‑select delete</title>
+    <title>log · search</title>
     <style>
         * {
             margin: 0;
@@ -12,17 +12,18 @@
         }
 
         body {
-            background: #0b1120;
-            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-            padding: 1.2rem;
-            color: #e2e8f0;
+            background: #f8fafc;
+            font-family: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
+            padding: 1.6rem 1.2rem;
+            color: #0f172a;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            transition: background 0.2s, color 0.2s;
         }
 
         .app {
-            max-width: 1300px;
+            max-width: 1000px;
             margin: 0 auto;
             width: 100%;
             flex: 1;
@@ -30,50 +31,41 @@
             flex-direction: column;
         }
 
+        /* ── Tabs ── */
         .tab-bar {
             display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1.2rem;
-            border-bottom: 1px solid #2d3a5e;
+            gap: 0.25rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
             padding-bottom: 0;
+            transition: border-color 0.2s;
         }
 
         .tab-btn {
-            background: #0f172a;
+            background: transparent;
             border: none;
-            padding: 0.65rem 1.6rem;
-            font-size: 0.85rem;
-            font-weight: 600;
-            border-radius: 32px 32px 16px 16px;
-            color: #94a3b8;
+            padding: 0.6rem 1.4rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border-radius: 0;
+            color: #64748b;
             cursor: pointer;
             transition: all 0.2s ease;
             letter-spacing: -0.2px;
-            backdrop-filter: blur(2px);
-            border: 1px solid #2d3a5e;
-            border-bottom: none;
+            border-bottom: 2px solid transparent;
             margin-bottom: -1px;
+            font-family: inherit;
         }
 
         .tab-btn.active {
-            background: #1e293b;
-            color: #facc15;
-            border-color: #5b6e8c;
-            border-bottom-color: #1e293b;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .tab-btn:first-child {
-            border-top-left-radius: 28px;
-        }
-        .tab-btn:last-child {
-            border-top-right-radius: 28px;
+            color: #0f172a;
+            border-bottom-color: #0f172a;
+            font-weight: 600;
         }
 
         .tab-btn:hover:not(.active) {
-            background: #111827;
-            color: #cbd5e1;
-            border-color: #475569;
+            color: #1e293b;
+            background: #f1f5f9;
         }
 
         .tab-panels {
@@ -97,7 +89,7 @@
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(5px);
+                transform: translateY(4px);
             }
             to {
                 opacity: 1;
@@ -105,13 +97,15 @@
             }
         }
 
+        /* ── Cards ── */
         .control-card {
-            background: #1e293b;
-            border-radius: 28px;
-            padding: 1.2rem 1.4rem;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 1.5rem 1.8rem;
             margin-bottom: 0;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-            border: 1px solid #334155;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.02);
+            border: 1px solid #eef2f6;
+            transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
         }
 
         .flex-between {
@@ -119,136 +113,200 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 0.8rem;
+            gap: 0.6rem;
             margin-bottom: 0.75rem;
         }
 
         h1 {
-            font-size: 1.35rem;
+            font-size: 1.2rem;
             font-weight: 600;
-            letter-spacing: -0.2px;
-            background: linear-gradient(135deg, #c084fc, #60a5fa);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
+            letter-spacing: -0.3px;
+            color: #0f172a;
+            transition: color 0.2s;
         }
 
         .sub {
             font-size: 0.7rem;
             color: #94a3b8;
-            border-left: 2px solid #3b82f6;
-            padding-left: 8px;
+            padding-left: 10px;
             margin-top: 2px;
+            font-weight: 400;
+            border-left: 2px solid #cbd5e1;
+            transition: color 0.2s, border-color 0.2s;
         }
 
         .stats-badge {
-            background: #0f172a;
+            background: #f1f5f9;
             border-radius: 40px;
-            padding: 4px 12px;
+            padding: 3px 14px;
             font-size: 0.7rem;
             font-weight: 500;
-            color: #a5f3fc;
-            border: 1px solid #2d3a5e;
+            color: #475569;
+            border: none;
+            transition: background 0.2s, color 0.2s;
         }
 
+        /* ── File zone ── */
         .file-zone {
             display: flex;
             align-items: center;
-            gap: 0.8rem;
+            gap: 0.6rem;
             flex-wrap: wrap;
-            margin: 0.8rem 0 0.6rem 0;
+            margin: 0.6rem 0 0.4rem 0;
         }
 
         .file-label,
         button {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 500;
             border-radius: 40px;
-            padding: 6px 14px;
-            background: #0f172a;
-            border: 1px solid #334155;
-            color: #e2e8f0;
+            padding: 5px 14px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            color: #1e293b;
             cursor: pointer;
-            transition: 0.2s;
+            transition: 0.15s;
+            font-family: inherit;
+            line-height: 1.4;
         }
 
         .file-label:hover,
         button:hover {
-            background: #2d3a5e;
-            border-color: #5b6e8c;
+            background: #e2e8f0;
+            border-color: #cbd5e1;
             transform: translateY(-1px);
         }
 
         button.secondary {
-            background: #0f172a;
-            border-color: #475569;
+            background: #f8fafc;
+            border-color: #e2e8f0;
+            color: #64748b;
+        }
+        button.secondary:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #0f172a;
         }
 
         #fileName {
             font-size: 0.7rem;
-            background: #0f172a;
-            padding: 4px 12px;
-            border-radius: 40px;
-            color: #cbd5e1;
+            color: #64748b;
+            padding: 2px 4px;
+            transition: color 0.2s;
         }
 
-        input {
-            background: #0f172a;
-            border: 1px solid #334155;
+        .restore-badge {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
             border-radius: 40px;
-            padding: 8px 14px;
+            padding: 2px 12px;
+            font-size: 0.6rem;
+            color: #065f46;
+            display: inline-block;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+        }
+
+        /* ── Inputs ── */
+        input {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 40px;
+            padding: 7px 14px;
             font-size: 0.8rem;
-            color: #f1f5f9;
+            color: #0f172a;
             width: 100%;
             outline: none;
             transition: 0.15s;
+            font-family: inherit;
         }
 
         input:focus {
-            border-color: #60a5fa;
-            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+            border-color: #94a3b8;
+            box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.15);
+            background: #ffffff;
+        }
+
+        input::placeholder {
+            color: #b0bec5;
         }
 
         .flex-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.8rem;
+            gap: 0.6rem;
             margin: 0.8rem 0 0.2rem;
         }
 
         .field-group {
             flex: 1;
-            min-width: 130px;
+            min-width: 120px;
         }
 
         label {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
-            color: #9ca3af;
-            margin-bottom: 4px;
+            letter-spacing: 0.4px;
+            color: #94a3b8;
+            margin-bottom: 3px;
             display: block;
+            transition: color 0.2s;
+        }
+
+        .field-group:last-child {
+            flex: 0.3;
+            min-width: 80px;
+        }
+
+        .field-group:last-child button {
+            width: 100%;
+            background: #0f172a;
+            border-color: #0f172a;
+            color: #fff;
+            padding: 7px 0;
+            font-weight: 500;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .field-group:last-child button:hover {
+            background: #1e293b;
+            border-color: #1e293b;
+            transform: translateY(-1px);
         }
 
         .format-example {
-            background: #0f172a;
-            border-radius: 18px;
-            padding: 8px 12px;
+            background: #f8fafc;
+            border-radius: 14px;
+            padding: 10px 14px;
             font-size: 0.7rem;
-            margin-top: 12px;
-            border-left: 3px solid #3b82f6;
-            font-family: monospace;
-            color: #cbd5e6;
+            margin-top: 14px;
+            border-left: 3px solid #cbd5e1;
+            color: #475569;
+            line-height: 1.6;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
         }
 
         code {
-            background: #00000044;
-            padding: 2px 6px;
-            border-radius: 12px;
-            font-size: 0.7rem;
+            background: #eef2f6;
+            padding: 1px 6px;
+            border-radius: 8px;
+            font-size: 0.65rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: #1e293b;
+            transition: background 0.2s, color 0.2s;
         }
 
+        .format-example span.highlight {
+            color: #b45309;
+            font-weight: 500;
+        }
+        .format-example span.accent {
+            color: #2563eb;
+        }
+        .format-example span.green {
+            color: #065f46;
+        }
+
+        /* ── Results ── */
         .results-raw {
             width: 100%;
             flex: 1;
@@ -262,45 +320,44 @@
             align-items: center;
             gap: 0.8rem;
             flex-wrap: wrap;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
             padding: 0 0.2rem;
         }
 
         .result-count-badge {
-            background: #0f172a;
+            background: #f1f5f9;
             border-radius: 40px;
-            padding: 4px 14px;
+            padding: 3px 14px;
             font-size: 0.7rem;
             font-weight: 500;
-            color: #a5f3fc;
-            border: 1px solid #334155;
+            color: #475569;
+            border: none;
             display: inline-block;
-            align-self: flex-start;
+            transition: background 0.2s, color 0.2s;
         }
 
         .delete-selected-btn {
-            background: #4c1d2b;
-            border: 1px solid #7f1d3a;
-            color: #fca5a5;
-            padding: 4px 14px;
+            background: #fef2f2;
+            border: 1px solid #fca5a5;
+            color: #991b1b;
+            padding: 3px 14px;
             border-radius: 40px;
             font-size: 0.7rem;
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
-            transition: 0.2s;
+            transition: 0.15s;
             display: none;
-            align-self: flex-start;
-        }
-
-        .delete-selected-btn:hover {
-            background: #7f1d3a;
-            border-color: #b91c3a;
-            color: #fff;
-            transform: translateY(-1px);
+            font-family: inherit;
         }
 
         .delete-selected-btn.visible {
             display: inline-block;
+        }
+
+        .delete-selected-btn:hover {
+            background: #fecaca;
+            border-color: #f87171;
+            transform: translateY(-1px);
         }
 
         .delete-selected-btn:disabled {
@@ -314,140 +371,154 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             padding: 0.2rem 0.2rem 0.2rem 0;
             max-height: none;
         }
 
         .convo-item {
-            background: #0f172a;
-            border: 1px solid #2d3a5e;
-            border-radius: 20px;
-            padding: 10px 14px;
+            background: #ffffff;
+            border: 1px solid #eef2f6;
+            border-radius: 16px;
+            padding: 10px 14px 10px 16px;
             transition: 0.05s linear;
             position: relative;
             padding-right: 44px;
         }
 
         .convo-item:hover {
-            background: #1e2a3a;
-            border-color: #5b6e8c;
+            border-color: #d1d9e6;
+            background: #fafcfc;
         }
 
         .convo-item.selected {
-            border-color: #60a5fa;
-            background: #1a2744;
-            box-shadow: 0 0 0 1px #60a5fa44;
+            border-color: #94a3b8;
+            background: #f8fafc;
+            box-shadow: 0 0 0 1px #94a3b8;
         }
 
         .msg-meta {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 10px;
             align-items: baseline;
-            margin-bottom: 6px;
-            font-size: 0.7rem;
+            margin-bottom: 4px;
+            font-size: 0.65rem;
         }
 
         .msg-datetime {
             font-family: 'JetBrains Mono', monospace;
-            background: #00000033;
-            padding: 2px 10px;
+            background: #f1f5f9;
+            padding: 1px 10px;
             border-radius: 30px;
             font-weight: 500;
-            color: #7dd3fc;
+            color: #475569;
+            transition: background 0.2s, color 0.2s;
         }
 
         .msg-speaker {
-            font-weight: 700;
-            background: #111827;
-            padding: 2px 10px;
+            font-weight: 600;
+            background: #f1f5f9;
+            padding: 1px 10px;
             border-radius: 30px;
-            color: #facc15;
-            font-size: 0.7rem;
+            color: #0f172a;
+            font-size: 0.65rem;
+            transition: background 0.2s, color 0.2s;
         }
 
         .msg-text {
             font-size: 0.8rem;
-            line-height: 1.45;
-            color: #e2e8f0;
+            line-height: 1.5;
+            color: #1e293b;
             white-space: pre-wrap;
             word-break: break-word;
+            transition: color 0.2s;
         }
 
         .msg-text mark {
-            background: none;
-            color: #facc15;
-            font-weight: 700;
-            padding: 0;
-            border-radius: 0;
-            box-shadow: none;
+            background: #fef3c7;
+            color: #92400e;
+            font-weight: 600;
+            padding: 0 2px;
+            border-radius: 3px;
+            transition: background 0.2s, color 0.2s;
         }
 
         .msg-select {
             position: absolute;
             top: 12px;
-            right: 12px;
-            width: 14px;
-            height: 14px;
+            right: 14px;
+            width: 15px;
+            height: 15px;
             margin: 0;
             padding: 0;
             cursor: pointer;
-            accent-color: #60a5fa;
+            accent-color: #0f172a;
             flex-shrink: 0;
             border-radius: 3px;
-            border: 1px solid #5b6e8c;
-            background: #0f172a;
+            border: 1px solid #cbd5e1;
+            background: #fff;
             transition: 0.1s;
             appearance: auto;
             -webkit-appearance: auto;
         }
 
         .msg-select:hover {
-            border-color: #93c5fd;
-            transform: scale(1.1);
+            border-color: #94a3b8;
+            transform: scale(1.05);
         }
 
         .msg-select:checked {
-            accent-color: #60a5fa;
-            border-color: #60a5fa;
+            accent-color: #0f172a;
+            border-color: #0f172a;
         }
 
         .empty-state {
             text-align: center;
             padding: 2rem 1.5rem;
-            background: #0f172a;
-            border-radius: 24px;
+            background: #ffffff;
+            border-radius: 20px;
             color: #94a3b8;
             font-size: 0.8rem;
-            border: 1px solid #2d3a5e;
+            border: 1px solid #eef2f6;
             margin: 0.2rem 0;
+            line-height: 1.6;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+
+        .empty-state code {
+            background: #f1f5f9;
         }
 
         footer {
             text-align: center;
             font-size: 0.6rem;
-            color: #5b6e8c;
-            margin-top: 1.8rem;
-            border-top: 1px dashed #1e293b;
+            color: #94a3b8;
+            margin-top: 2rem;
+            border-top: 1px solid #eef2f6;
             padding-top: 1rem;
-            transition: opacity 0.2s;
+            transition: opacity 0.2s, color 0.2s, border-color 0.2s;
         }
 
         footer.hide-footer {
             display: none;
         }
 
+        /* ── Responsive ── */
         @media (max-width: 640px) {
             body {
                 padding: 0.8rem;
             }
             .control-card {
-                padding: 1rem;
+                padding: 1rem 1.2rem;
             }
             .flex-row {
                 flex-direction: column;
-                gap: 0.6rem;
+                gap: 0.5rem;
+            }
+            .field-group:last-child {
+                flex: 1;
+                min-width: 100%;
             }
             .msg-text {
                 padding-right: 0;
@@ -463,116 +534,317 @@
             }
             .tab-btn {
                 padding: 0.5rem 1rem;
-                font-size: 0.75rem;
+                font-size: 0.7rem;
+            }
+            .format-example {
+                font-size: 0.65rem;
+                padding: 8px 12px;
             }
         }
 
-        .restore-badge {
-            background: #1e293b;
-            border: 1px solid #3b82f6;
-            border-radius: 40px;
-            padding: 2px 12px;
-            font-size: 0.6rem;
-            color: #93c5fd;
-            margin-left: 8px;
-            display: inline-block;
-            opacity: 0.7;
+        @media (max-width: 480px) {
+            .file-zone {
+                flex-wrap: wrap;
+            }
+            .flex-between {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            h1 {
+                font-size: 1rem;
+            }
+        }
+
+        /* ── DARK MODE ── */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: #0b1120;
+                color: #e2e8f0;
+            }
+
+            .tab-bar {
+                border-bottom-color: #2d3a5e;
+            }
+
+            .tab-btn {
+                color: #94a3b8;
+            }
+            .tab-btn.active {
+                color: #facc15;
+                border-bottom-color: #facc15;
+            }
+            .tab-btn:hover:not(.active) {
+                color: #e2e8f0;
+                background: #1e293b;
+            }
+
+            .control-card {
+                background: #1e293b;
+                border-color: #2d3a5e;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            }
+
+            h1 {
+                color: #f1f5f9;
+            }
+
+            .sub {
+                color: #94a3b8;
+                border-left-color: #3b82f6;
+            }
+
+            .stats-badge {
+                background: #0f172a;
+                color: #a5f3fc;
+                border: 1px solid #2d3a5e;
+            }
+
+            .file-label,
+            button {
+                background: #0f172a;
+                border-color: #334155;
+                color: #e2e8f0;
+            }
+            .file-label:hover,
+            button:hover {
+                background: #2d3a5e;
+                border-color: #5b6e8c;
+            }
+
+            button.secondary {
+                background: #0f172a;
+                border-color: #475569;
+                color: #94a3b8;
+            }
+            button.secondary:hover {
+                background: #1e293b;
+                border-color: #5b6e8c;
+                color: #e2e8f0;
+            }
+
+            #fileName {
+                color: #cbd5e1;
+            }
+
+            .restore-badge {
+                background: #1e293b;
+                border-color: #3b82f6;
+                color: #93c5fd;
+            }
+
+            input {
+                background: #0f172a;
+                border-color: #334155;
+                color: #f1f5f9;
+            }
+            input:focus {
+                border-color: #60a5fa;
+                box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+                background: #1e293b;
+            }
+            input::placeholder {
+                color: #64748b;
+            }
+
+            label {
+                color: #9ca3af;
+            }
+
+            .field-group:last-child button {
+                background: #facc15;
+                border-color: #facc15;
+                color: #0f172a;
+            }
+            .field-group:last-child button:hover {
+                background: #eab308;
+                border-color: #eab308;
+            }
+
+            .format-example {
+                background: #0f172a;
+                border-left-color: #3b82f6;
+                color: #cbd5e1;
+            }
+            .format-example code {
+                background: #1e293b;
+                color: #e2e8f0;
+            }
+            .format-example span.highlight {
+                color: #fbbf24;
+            }
+            .format-example span.accent {
+                color: #60a5fa;
+            }
+            .format-example span.green {
+                color: #34d399;
+            }
+
+            .result-count-badge {
+                background: #0f172a;
+                color: #a5f3fc;
+                border: 1px solid #2d3a5e;
+            }
+
+            .delete-selected-btn {
+                background: #4c1d2b;
+                border-color: #7f1d3a;
+                color: #fca5a5;
+            }
+            .delete-selected-btn:hover {
+                background: #7f1d3a;
+                border-color: #b91c3a;
+                color: #fff;
+            }
+
+            .convo-item {
+                background: #0f172a;
+                border-color: #2d3a5e;
+            }
+            .convo-item:hover {
+                background: #1e2a3a;
+                border-color: #5b6e8c;
+            }
+            .convo-item.selected {
+                border-color: #60a5fa;
+                background: #1a2744;
+                box-shadow: 0 0 0 1px #60a5fa44;
+            }
+
+            .msg-datetime {
+                background: #111827;
+                color: #7dd3fc;
+            }
+            .msg-speaker {
+                background: #111827;
+                color: #facc15;
+            }
+            .msg-text {
+                color: #e2e8f0;
+            }
+            .msg-text mark {
+                background: #fef3c7;
+                color: #92400e;
+            }
+
+            .msg-select {
+                border-color: #5b6e8c;
+                background: #0f172a;
+            }
+            .msg-select:hover {
+                border-color: #93c5fd;
+            }
+            .msg-select:checked {
+                accent-color: #60a5fa;
+                border-color: #60a5fa;
+            }
+
+            .empty-state {
+                background: #0f172a;
+                color: #94a3b8;
+                border-color: #2d3a5e;
+            }
+            .empty-state code {
+                background: #1e293b;
+                color: #e2e8f0;
+            }
+
+            footer {
+                color: #5b6e8c;
+                border-top-color: #1e293b;
+            }
         }
     </style>
 </head>
 <body>
     <div class="app">
         <div class="tab-bar">
-            <button class="tab-btn active" data-tab="search">🔎 Search &amp; Filters</button>
-            <button class="tab-btn" data-tab="results">📋 Search Results</button>
+            <button class="tab-btn active" data-tab="search">Search</button>
+            <button class="tab-btn" data-tab="results">Results</button>
         </div>
 
         <div class="tab-panels">
-            <!-- TAB 1: SEARCH / CONTROL PANEL -->
+            <!-- TAB 1: SEARCH -->
             <div class="tab-panel active-panel" id="searchPanel">
                 <div class="control-card">
                     <div class="flex-between">
                         <div>
-                            <h1>⌕ conversation searcher</h1>
-                            <div class="sub">upload · filter by speaker(s) + date range · <span style="color:#facc15; font-weight:600;">bold yellow matches</span></div>
+                            <h1>⌕ log search</h1>
+                            <div class="sub">upload · filter by speaker &amp; date</div>
                         </div>
-                        <div class="stats-badge" id="parseStats">📄 no file</div>
+                        <div class="stats-badge" id="parseStats">no file</div>
                     </div>
 
                     <div class="file-zone">
                         <input type="file" id="fileInput" accept=".txt, .text/plain" style="display: none;">
-                        <button class="file-label" id="uploadBtn">📁 choose .txt</button>
-                        <span id="fileName">no file selected</span>
-                        <button id="clearFileBtn" class="secondary" style="padding: 5px 12px;">🗑 clear</button>
+                        <button class="file-label" id="uploadBtn">choose .txt</button>
+                        <span id="fileName">none</span>
+                        <button id="clearFileBtn" class="secondary" style="padding: 4px 12px;">clear</button>
                         <span id="restoreIndicator" class="restore-badge" style="display:none;">↻ restored</span>
                     </div>
 
                     <div class="flex-row">
                         <div class="field-group">
                             <label>speaker 1 *</label>
-                            <input type="text" id="name1" placeholder="e.g., Samuel EA" autocomplete="off">
+                            <input type="text" id="name1" placeholder="e.g. Samuel" autocomplete="off">
                         </div>
                         <div class="field-group">
-                            <label>speaker 2 (optional)</label>
-                            <input type="text" id="name2" placeholder="e.g., Warriblood EA" autocomplete="off">
+                            <label>speaker 2</label>
+                            <input type="text" id="name2" placeholder="optional" autocomplete="off">
                         </div>
                         <div class="field-group">
                             <label>from</label>
-                            <input type="text" id="startDate" placeholder="dd/mm/yyyy or m/d/yy" autocomplete="off">
+                            <input type="text" id="startDate" placeholder="dd/mm/yyyy" autocomplete="off">
                         </div>
                         <div class="field-group">
                             <label>to</label>
-                            <input type="text" id="endDate" placeholder="dd/mm/yyyy or m/d/yy" autocomplete="off">
+                            <input type="text" id="endDate" placeholder="dd/mm/yyyy" autocomplete="off">
                         </div>
-                        <div class="field-group" style="flex: 0.4; min-width: 90px;">
-                            <label>🔍</label>
-                            <button id="searchBtn" style="width:100%">search</button>
+                        <div class="field-group">
+                            <label>&nbsp;</label>
+                            <button id="searchBtn">search</button>
                         </div>
                     </div>
 
                     <div class="format-example">
-                        <strong>Supports two formats:</strong><br>
-                        🆕 <code>[dd/mm/yyyy, HH:MM:SS] Speaker: message</code><br>
-                        📅 <code>m/d/yy, HH:MM - Speaker: message</code><br>
-                        <span style="color:#a5f3fc;">↳ multi‑line:</span> any line without timestamp is attached to previous message<br>
-                        examples:<br>
-                        <code>[15/07/2025, 23:11:51] Samuel EA: Something that I deal with very well.</code><br>
-                        <code>6/6/26, 22:16 - Warriblood EA: Waiting for you</code><br>
-                        <span style="color:#facc15; font-weight:500;">✨ bold yellow matches · ☑️ select multiple with tiny checkboxes · 🗑️ delete selected</span><br>
-                        <span style="color:#7dd3fc;">📌 Results appear in "Search Results" tab → selectable, deletable, highlighted, no footer</span>
-                        <span style="color:#34d399; display:inline-block; margin-left:12px;">💾 all inputs &amp; selections auto‑saved</span>
+                        <span style="font-weight:500; color:inherit;">Formats</span>
+                        &nbsp;·&nbsp; <code>[15/07/2025, 23:11:51] Speaker: text</code>
+                        &nbsp;·&nbsp; <code>6/6/26, 22:16 - Speaker: text</code>
+                        <br>
+                        <span class="accent">↳</span> multi‑line merged &nbsp;·&nbsp; <span class="highlight">bold yellow</span> matches
+                        &nbsp;·&nbsp; <span class="green">☑️ select &amp; delete</span>
+                        &nbsp;·&nbsp; <span style="color:#64748b;">💾 auto‑saved</span>
                     </div>
                 </div>
             </div>
 
-            <!-- TAB 2: RESULTS PANEL -->
+            <!-- TAB 2: RESULTS -->
             <div class="tab-panel" id="resultsPanel">
                 <div class="results-raw">
-                    <div class="results-header" id="resultsHeader">
+                    <div class="results-header">
                         <span class="result-count-badge" id="resultCountBadge">0 messages</span>
                         <button class="delete-selected-btn" id="deleteSelectedBtn">🗑 Delete selected</button>
                     </div>
                     <div id="resultsContainer" class="message-list">
-                        <div class="empty-state">✨ perform a search in the "Search &amp; Filters" tab → results will appear here.<br>bold yellow highlights · ☑️ check messages → delete selected<br><span style="color:#a5f3fc;">📐 Footer hidden on this tab → results use full vertical space.</span></div>
+                        <div class="empty-state">upload a log · search → results appear here<br><span style="color:#94a3b8;">select messages with checkboxes · delete selected</span></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <footer id="mainFooter">dual format: [dd/mm/yyyy, HH:MM:SS] or m/d/yy, HH:MM · continuation lines merged · speaker names = bold yellow · multi‑select delete · tabbed results · 💾 auto‑persist</footer>
+        <footer id="mainFooter">dual format · continuation lines · bold highlights · select &amp; delete · auto‑persist</footer>
     </div>
 
     <script>
-        // ---------- GLOBALS ----------
+        // ── GLOBALS ──
         let parsedMessages = [];
         let fileLoaded = false;
         let currentDisplayedMessages = [];
         let currentHighlightNames = [];
         let selectedMessages = new Set();
         let rawFileContent = null;
-        let restoreInProgress = false; // prevent save during restore
+        let restoreInProgress = false;
 
-        // DOM elements
+        // DOM
         const fileInput = document.getElementById('fileInput');
         const uploadBtn = document.getElementById('uploadBtn');
         const clearFileBtn = document.getElementById('clearFileBtn');
@@ -589,321 +861,234 @@
         const resultCountBadge = document.getElementById('resultCountBadge');
         const restoreIndicator = document.getElementById('restoreIndicator');
 
-        // ---------- PERSISTENCE ----------
+        // ── PERSISTENCE ──
         const STORAGE_KEY = 'edge_searcher_state';
 
         function getMessageId(msg) {
-            const content = `${msg.speaker}|${msg.rawDate}|${msg.rawTime}|${msg.message}`;
-            let hash = 0;
-            for (let i = 0; i < content.length; i++) {
-                const char = content.charCodeAt(i);
-                hash = ((hash << 5) - hash) + char;
-                hash = hash & hash;
-            }
-            return `${msg.speaker}|${msg.rawDate}|${msg.rawTime}|${hash}`;
+            const s = `${msg.speaker}|${msg.rawDate}|${msg.rawTime}|${msg.message}`;
+            let h = 0;
+            for (let i = 0; i < s.length; i++) { h = ((h << 5) - h) + s.charCodeAt(i);
+                h = h & h; }
+            return `${msg.speaker}|${msg.rawDate}|${msg.rawTime}|${h}`;
         }
 
         function saveState() {
             if (restoreInProgress) return;
             try {
-                const selectedIds = [];
-                for (const msg of selectedMessages) {
-                    selectedIds.push(getMessageId(msg));
-                }
+                const selIds = [];
+                for (const m of selectedMessages) selIds.push(getMessageId(m));
                 const state = {
                     fileContent: rawFileContent || null,
-                    fileName: fileNameSpan.textContent !== 'no file selected' ? fileNameSpan.textContent : null,
+                    fileName: fileNameSpan.textContent !== 'none' ? fileNameSpan.textContent : null,
                     name1: name1Input.value,
                     name2: name2Input.value,
                     startDate: startDateInput.value,
                     endDate: endDateInput.value,
-                    selectedIds: selectedIds,
+                    selectedIds: selIds,
                     activeTab: document.querySelector('.tab-btn.active')?.dataset?.tab || 'search',
                 };
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-            } catch (e) {
-                // ignore
-                console.warn('saveState error:', e);
-            }
+            } catch (_) { /* ignore */ }
         }
 
         function loadState() {
-            try {
-                const raw = localStorage.getItem(STORAGE_KEY);
-                if (!raw) return null;
-                return JSON.parse(raw);
-            } catch (e) {
-                return null;
-            }
+            try { const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; } catch (_) { return null; }
         }
 
-        function clearSavedState() {
-            try {
-                localStorage.removeItem(STORAGE_KEY);
-            } catch (e) { /* ignore */ }
-        }
+        function clearSavedState() { try { localStorage.removeItem(STORAGE_KEY); } catch (_) {} }
 
-        // ---------- TAB MANAGEMENT ----------
+        // ── TABS ──
         const tabBtns = document.querySelectorAll('.tab-btn');
         const panels = document.querySelectorAll('.tab-panel');
 
         function switchTab(tabId, save = true) {
             panels.forEach(p => p.classList.remove('active-panel'));
             tabBtns.forEach(b => b.classList.remove('active'));
-            const activePanel = document.getElementById(`${tabId}Panel`);
-            if (activePanel) activePanel.classList.add('active-panel');
-            const activeBtn = Array.from(tabBtns).find(b => b.dataset.tab === tabId);
-            if (activeBtn) activeBtn.classList.add('active');
+            const panel = document.getElementById(`${tabId}Panel`);
+            if (panel) panel.classList.add('active-panel');
+            const btn = Array.from(tabBtns).find(b => b.dataset.tab === tabId);
+            if (btn) btn.classList.add('active');
 
-            if (tabId === 'results') {
-                if (mainFooter) mainFooter.classList.add('hide-footer');
-            } else {
-                if (mainFooter) mainFooter.classList.remove('hide-footer');
-            }
-            if (tabId === 'results') {
-                updateDeleteButtonVisibility();
-            }
+            if (tabId === 'results') mainFooter?.classList.add('hide-footer');
+            else mainFooter?.classList.remove('hide-footer');
+
+            if (tabId === 'results') updateDeleteButtonVisibility();
             if (save) saveState();
         }
 
-        tabBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const tabName = btn.dataset.tab;
-                switchTab(tabName, true);
-            });
-        });
+        tabBtns.forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab, true)));
 
-        if (mainFooter) mainFooter.classList.remove('hide-footer');
+        // ── HELPERS ──
+        function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
-        // ---------- HELPERS ----------
-        function escapeRegex(str) {
-            return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        }
-
-        function highlightText(text, highlightNames) {
-            if (!highlightNames || highlightNames.length === 0) {
-                return text.replace(/[&<>]/g, function(m) {
-                    if (m === '&') return '&amp;';
-                    if (m === '<') return '&lt;';
-                    if (m === '>') return '&gt;';
-                    return m;
-                }).replace(/\n/g, '<br>');
+        function highlightText(text, names) {
+            let out = text.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+            if (!names || !names.length) return out.replace(/\n/g, '<br>');
+            const unique = [];
+            const seen = new Set();
+            for (const n of names) { const l = n.toLowerCase(); if (!seen.has(l)) { seen.add(l);
+                    unique.push(n); } }
+            unique.sort((a, b) => b.length - a.length);
+            for (const n of unique) {
+                if (!n.length) continue;
+                const re = new RegExp(`(${escapeRegex(n)})`, 'gi');
+                out = out.replace(re, '<mark>$1</mark>');
             }
-
-            let escaped = text.replace(/[&<>]/g, function(m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            });
-
-            const uniqueNames = [];
-            const lowerSet = new Set();
-            for (const name of highlightNames) {
-                const lower = name.toLowerCase();
-                if (!lowerSet.has(lower)) {
-                    lowerSet.add(lower);
-                    uniqueNames.push(name);
-                }
-            }
-            uniqueNames.sort((a, b) => b.length - a.length);
-            for (const name of uniqueNames) {
-                if (name.length === 0) continue;
-                const regex = new RegExp(`(${escapeRegex(name)})`, 'gi');
-                escaped = escaped.replace(regex, `<mark>$1</mark>`);
-            }
-            return escaped.replace(/\n/g, '<br>');
+            return out.replace(/\n/g, '<br>');
         }
 
-        // ---------- DATE PARSERS ----------
-        function parseDateDMY(dateStr) {
-            if (!dateStr || typeof dateStr !== 'string') return null;
-            const trimmed = dateStr.trim();
-            const regex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
-            const match = trimmed.match(regex);
-            if (!match) return null;
-            let day = parseInt(match[1], 10);
-            let month = parseInt(match[2], 10);
-            let year = parseInt(match[3], 10);
-            if (month < 1 || month > 12 || day < 1 || day > 31) return null;
-            const dateObj = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
-            return isNaN(dateObj.getTime()) ? null : dateObj.getTime();
+        // ── DATE PARSERS ──
+        function parseDateDMY(s) {
+            if (!s || typeof s !== 'string') return null;
+            const m = s.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (!m) return null;
+            let d = parseInt(m[1], 10),
+                mo = parseInt(m[2], 10),
+                y = parseInt(m[3], 10);
+            if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+            const dt = new Date(Date.UTC(y, mo - 1, d, 0, 0, 0, 0));
+            return isNaN(dt.getTime()) ? null : dt.getTime();
         }
 
-        function parseDateMDY(dateStr) {
-            if (!dateStr || typeof dateStr !== 'string') return null;
-            const trimmed = dateStr.trim();
-            const regex = /^(\d{1,2})\/(\d{1,2})\/(\d{2})$/;
-            const match = trimmed.match(regex);
-            if (!match) return null;
-            let month = parseInt(match[1], 10);
-            let day = parseInt(match[2], 10);
-            let yearShort = parseInt(match[3], 10);
-            if (month < 1 || month > 12 || day < 1 || day > 31) return null;
-            let fullYear = 2000 + yearShort;
-            const dateObj = new Date(Date.UTC(fullYear, month - 1, day, 0, 0, 0, 0));
-            return isNaN(dateObj.getTime()) ? null : dateObj.getTime();
+        function parseDateMDY(s) {
+            if (!s || typeof s !== 'string') return null;
+            const m = s.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})$/);
+            if (!m) return null;
+            let mo = parseInt(m[1], 10),
+                d = parseInt(m[2], 10),
+                yy = parseInt(m[3], 10);
+            if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+            const dt = new Date(Date.UTC(2000 + yy, mo - 1, d, 0, 0, 0, 0));
+            return isNaN(dt.getTime()) ? null : dt.getTime();
         }
 
-        function parseDateUniversal(dateStr) {
-            if (!dateStr || typeof dateStr !== 'string') return null;
-            let result = parseDateDMY(dateStr);
-            if (result !== null) return result;
-            return parseDateMDY(dateStr);
+        function parseDateUniversal(s) {
+            if (!s || typeof s !== 'string') return null;
+            return parseDateDMY(s) ?? parseDateMDY(s);
         }
 
-        function normaliseWhitespace(line) {
-            return line.replace(/[\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]/g, ' ');
-        }
+        function normaliseWhitespace(s) { return s.replace(/[\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]/g, ' '); }
 
-        // ---------- FORMAT 1 ----------
+        // ── FORMAT 1 ──
         function parseNewFormat(line) {
-            let cleaned = normaliseWhitespace(line);
-            const regex = /^\[(\d{1,2}\/\d{1,2}\/\d{4}),\s+(\d{1,2}:\d{2}:\d{2})\]\s+([^:]+):\s*(.*)$/;
-            const match = cleaned.match(regex);
-            if (!match) return null;
-
-            const dateStr = match[1];
-            const timeStr = match[2];
-            let speakerRaw = match[3].trim();
-            const firstLineMsg = match[4].trim();
-            if (!speakerRaw) return null;
-
-            const timeRegex = /^(\d{1,2}):(\d{2}):(\d{2})$/;
-            const timeMatch = timeStr.match(timeRegex);
-            if (!timeMatch) return null;
-            let hours = parseInt(timeMatch[1], 10);
-            let minutes = parseInt(timeMatch[2], 10);
-            let seconds = parseInt(timeMatch[3], 10);
-            if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59 || seconds < 0 || seconds > 59) return null;
-
-            const dateParts = dateStr.split('/');
-            if (dateParts.length !== 3) return null;
-            let day = parseInt(dateParts[0], 10);
-            let month = parseInt(dateParts[1], 10);
-            let year = parseInt(dateParts[2], 10);
-            if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
-            if (month < 1 || month > 12 || day < 1 || day > 31) return null;
-
-            const dayMidnightUTC = Date.UTC(year, month - 1, day, 0, 0, 0, 0);
-            if (isNaN(dayMidnightUTC)) return null;
-            const fullDateObj = new Date(Date.UTC(year, month - 1, day, hours, minutes, seconds, 0));
-            if (isNaN(fullDateObj.getTime())) return null;
-
+            const cleaned = normaliseWhitespace(line);
+            const m = cleaned.match(/^\[(\d{1,2}\/\d{1,2}\/\d{4}),\s+(\d{1,2}:\d{2}:\d{2})\]\s+([^:]+):\s*(.*)$/);
+            if (!m) return null;
+            const dateStr = m[1],
+                timeStr = m[2],
+                speaker = m[3].trim(),
+                msg = m[4].trim();
+            if (!speaker) return null;
+            const tm = timeStr.match(/^(\d{1,2}):(\d{2}):(\d{2})$/);
+            if (!tm) return null;
+            let h = parseInt(tm[1], 10),
+                min = parseInt(tm[2], 10),
+                sec = parseInt(tm[3], 10);
+            if (h < 0 || h > 23 || min < 0 || min > 59 || sec < 0 || sec > 59) return null;
+            const parts = dateStr.split('/');
+            if (parts.length !== 3) return null;
+            let d = parseInt(parts[0], 10),
+                mo = parseInt(parts[1], 10),
+                y = parseInt(parts[2], 10);
+            if (isNaN(d) || isNaN(mo) || isNaN(y) || mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+            const full = new Date(Date.UTC(y, mo - 1, d, h, min, sec, 0));
+            if (isNaN(full.getTime())) return null;
             return {
                 rawDate: dateStr,
                 rawTime: timeStr,
-                speaker: speakerRaw,
-                message: firstLineMsg,
-                speakerLower: speakerRaw.toLowerCase(),
-                dayTimestamp: dayMidnightUTC,
-                fullTimestamp: fullDateObj.getTime(),
+                speaker,
+                message: msg,
+                speakerLower: speaker.toLowerCase(),
+                dayTimestamp: Date.UTC(y, mo - 1, d, 0, 0, 0, 0),
+                fullTimestamp: full.getTime(),
                 displayDate: dateStr,
-                displayTime: timeStr
+                displayTime: timeStr,
+                continuationLines: []
             };
         }
 
-        // ---------- FORMAT 2 ----------
+        // ── FORMAT 2 ──
         function parseLegacyFormat(line) {
-            let cleaned = normaliseWhitespace(line);
-            const regex = /^(\d{1,2}\/\d{1,2}\/\d{2}),\s+(\d{1,2}:\d{2})\s+-\s+([^:]+):\s*(.*)$/;
-            const match = cleaned.match(regex);
-            if (!match) return null;
-
-            const dateStr = match[1];
-            const timeStr = match[2];
-            let speakerRaw = match[3].trim();
-            const firstLineMsg = match[4].trim();
-            if (!speakerRaw) return null;
-
-            const timeRegex = /^(\d{1,2}):(\d{2})$/;
-            const timeMatch = timeStr.match(timeRegex);
-            if (!timeMatch) return null;
-            let hours = parseInt(timeMatch[1], 10);
-            let minutes = parseInt(timeMatch[2], 10);
-            if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
-
-            const dateParts = dateStr.split('/');
-            if (dateParts.length !== 3) return null;
-            let month = parseInt(dateParts[0], 10);
-            let day = parseInt(dateParts[1], 10);
-            let yy = parseInt(dateParts[2], 10);
-            if (isNaN(month) || isNaN(day) || isNaN(yy)) return null;
-            if (month < 1 || month > 12 || day < 1 || day > 31) return null;
-            let fullYear = 2000 + yy;
-
-            const dayMidnightUTC = Date.UTC(fullYear, month - 1, day, 0, 0, 0, 0);
-            if (isNaN(dayMidnightUTC)) return null;
-            const fullDateObj = new Date(Date.UTC(fullYear, month - 1, day, hours, minutes, 0, 0));
-            if (isNaN(fullDateObj.getTime())) return null;
-
+            const cleaned = normaliseWhitespace(line);
+            const m = cleaned.match(/^(\d{1,2}\/\d{1,2}\/\d{2}),\s+(\d{1,2}:\d{2})\s+-\s+([^:]+):\s*(.*)$/);
+            if (!m) return null;
+            const dateStr = m[1],
+                timeStr = m[2],
+                speaker = m[3].trim(),
+                msg = m[4].trim();
+            if (!speaker) return null;
+            const tm = timeStr.match(/^(\d{1,2}):(\d{2})$/);
+            if (!tm) return null;
+            let h = parseInt(tm[1], 10),
+                min = parseInt(tm[2], 10);
+            if (h < 0 || h > 23 || min < 0 || min > 59) return null;
+            const parts = dateStr.split('/');
+            if (parts.length !== 3) return null;
+            let mo = parseInt(parts[0], 10),
+                d = parseInt(parts[1], 10),
+                yy = parseInt(parts[2], 10);
+            if (isNaN(mo) || isNaN(d) || isNaN(yy) || mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+            const y = 2000 + yy;
+            const full = new Date(Date.UTC(y, mo - 1, d, h, min, 0, 0));
+            if (isNaN(full.getTime())) return null;
             return {
                 rawDate: dateStr,
                 rawTime: timeStr,
-                speaker: speakerRaw,
-                message: firstLineMsg,
-                speakerLower: speakerRaw.toLowerCase(),
-                dayTimestamp: dayMidnightUTC,
-                fullTimestamp: fullDateObj.getTime(),
+                speaker,
+                message: msg,
+                speakerLower: speaker.toLowerCase(),
+                dayTimestamp: Date.UTC(y, mo - 1, d, 0, 0, 0, 0),
+                fullTimestamp: full.getTime(),
                 displayDate: dateStr,
-                displayTime: timeStr
+                displayTime: timeStr,
+                continuationLines: []
             };
         }
 
         function parseMainMessageLine(line) {
-            let result = parseNewFormat(line);
-            if (result) return result;
-            return parseLegacyFormat(line);
+            return parseNewFormat(line) ?? parseLegacyFormat(line);
         }
 
         function parseFileWithContinuations(text) {
             const lines = text.split(/\r?\n/);
-            const messages = [];
-            let currentMessage = null;
-
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i];
-                const mainMatch = parseMainMessageLine(line);
-                if (mainMatch) {
-                    if (currentMessage) messages.push(currentMessage);
-                    currentMessage = mainMatch;
-                    currentMessage.continuationLines = [];
+            const msgs = [];
+            let cur = null;
+            for (const line of lines) {
+                const match = parseMainMessageLine(line);
+                if (match) {
+                    if (cur) msgs.push(cur);
+                    cur = match;
+                    cur.continuationLines = [];
                 } else {
-                    if (currentMessage && line.trim() !== "") {
-                        currentMessage.continuationLines.push(line);
-                    } else if (currentMessage && line === "") {
-                        currentMessage.continuationLines.push(line);
-                    }
+                    if (cur && line.trim() !== '') cur.continuationLines.push(line);
+                    else if (cur && line === '') cur.continuationLines.push(line);
                 }
             }
-            if (currentMessage) messages.push(currentMessage);
-
-            const finalMessages = [];
-            for (const msg of messages) {
-                let fullText = msg.message;
-                if (msg.continuationLines.length > 0) {
-                    fullText += "\n" + msg.continuationLines.join("\n");
-                }
-                finalMessages.push({
-                    rawDate: msg.rawDate,
-                    rawTime: msg.rawTime,
-                    speaker: msg.speaker,
-                    speakerLower: msg.speakerLower,
-                    message: fullText,
-                    dayTimestamp: msg.dayTimestamp,
-                    fullTimestamp: msg.fullTimestamp,
-                    displayDate: msg.displayDate || msg.rawDate,
-                    displayTime: msg.displayTime || msg.rawTime
+            if (cur) msgs.push(cur);
+            const out = [];
+            for (const m of msgs) {
+                let full = m.message;
+                if (m.continuationLines.length) full += '\n' + m.continuationLines.join('\n');
+                out.push({
+                    rawDate: m.rawDate,
+                    rawTime: m.rawTime,
+                    speaker: m.speaker,
+                    speakerLower: m.speakerLower,
+                    message: full,
+                    dayTimestamp: m.dayTimestamp,
+                    fullTimestamp: m.fullTimestamp,
+                    displayDate: m.displayDate || m.rawDate,
+                    displayTime: m.displayTime || m.rawTime
                 });
             }
-            return { messages: finalMessages, skippedLines: 0 };
+            return { messages: out, skippedLines: 0 };
         }
 
-        // ---------- UI UPDATES ----------
-        function updateStatsDisplay(count, skipped = 0) {
-            if (count === 0 && !fileLoaded) parseStatsSpan.innerHTML = `📄 no file`;
-            else if (count === 0 && fileLoaded) parseStatsSpan.innerHTML = `⚠️ 0 messages`;
-            else parseStatsSpan.innerHTML = `✅ ${count} msgs`;
+        // ── UI UPDATES ──
+        function updateStatsDisplay(count) {
+            if (count === 0 && !fileLoaded) parseStatsSpan.textContent = 'no file';
+            else if (count === 0 && fileLoaded) parseStatsSpan.textContent = '0 messages';
+            else parseStatsSpan.textContent = `${count} msgs`;
         }
 
         function resetSearchResults() {
@@ -913,209 +1098,166 @@
             if (resultsContainer) {
                 if (fileLoaded && parsedMessages.length > 0) {
                     resultsContainer.innerHTML =
-                        `<div class="empty-state">🔎 File loaded. Use "Search & Filters" tab → enter speaker names + date range → search.<br>Results will appear here with bold yellow highlights and tiny select checkboxes.<br>📐 Footer hidden on this tab → full vertical space.</div>`;
+                        `<div class="empty-state">file loaded · enter speaker + date → search<br><span style="color:#94a3b8;">results appear here with bold highlights &amp; checkboxes</span></div>`;
                 } else if (fileLoaded && parsedMessages.length === 0) {
                     resultsContainer.innerHTML =
-                        `<div class="empty-state">⚠️ No valid messages in current file.<br>Check formats: <code>[dd/mm/yyyy, HH:MM:SS] Speaker: message</code> or <code>m/d/yy, HH:MM - Speaker: message</code></div>`;
+                        `<div class="empty-state">no valid messages in file<br><span style="color:#94a3b8;">check format: <code>[dd/mm/yyyy, HH:MM:SS] Speaker: text</code></span></div>`;
                 } else {
                     resultsContainer.innerHTML =
-                        `<div class="empty-state">📂 Upload a chat log first.<br>Then search to see selectable, deletable, highlighted results in this tab.<br>Footer is hidden on results tab for maximum space.</div>`;
+                        `<div class="empty-state">upload a log · search → results appear here<br><span style="color:#94a3b8;">select messages with checkboxes · delete selected</span></div>`;
                 }
             }
             updateResultCount(0);
             updateDeleteButtonVisibility();
         }
 
-        function updateResultCount(count) {
-            if (resultCountBadge) {
-                resultCountBadge.textContent = `${count} message${count !== 1 ? 's' : ''}`;
-            }
-        }
+        function updateResultCount(n) { if (resultCountBadge) resultCountBadge.textContent = `${n} message${n !== 1 ? 's' : ''}`; }
 
         function updateDeleteButtonVisibility() {
-            const count = selectedMessages.size;
-            if (count > 0) {
+            const n = selectedMessages.size;
+            if (n > 0) {
                 deleteSelectedBtn.classList.add('visible');
-                deleteSelectedBtn.textContent = `🗑 Delete selected (${count})`;
+                deleteSelectedBtn.textContent = `🗑 Delete selected (${n})`;
                 deleteSelectedBtn.disabled = false;
             } else {
                 deleteSelectedBtn.classList.remove('visible');
-                deleteSelectedBtn.textContent = `🗑 Delete selected`;
+                deleteSelectedBtn.textContent = '🗑 Delete selected';
                 deleteSelectedBtn.disabled = true;
             }
         }
 
-        // ---------- RENDER RESULTS ----------
+        // ── RENDER ──
         function renderResults(messages, highlightNames) {
             if (!messages.length) {
                 if (fileLoaded && parsedMessages.length) {
                     resultsContainer.innerHTML =
-                        `<div class="empty-state">✨ No messages match current filters. Adjust speaker names or date range.<br>🗑️ Deleted messages only removed from this view (source file untouched).</div>`;
+                        `<div class="empty-state">no matches · adjust filters<br><span style="color:#94a3b8;">deleted messages are removed from this view only</span></div>`;
                 } else if (!fileLoaded) {
                     resultsContainer.innerHTML =
-                        `<div class="empty-state">📂 Upload a chat log to start. Then search → results appear here.<br>Footer hidden on this tab → results use full height.</div>`;
-                } else if (fileLoaded && parsedMessages.length === 0) {
-                    resultsContainer.innerHTML =
-                        `<div class="empty-state">⚠️ No valid messages in file. Check format.</div>`;
+                        `<div class="empty-state">upload a log · search → results appear here<br><span style="color:#94a3b8;">select messages with checkboxes · delete selected</span></div>`;
                 } else {
                     resultsContainer.innerHTML =
-                        `<div class="empty-state">✨ No results. Try different search criteria.</div>`;
+                        `<div class="empty-state">no results · try different criteria</div>`;
                 }
                 updateResultCount(0);
                 updateDeleteButtonVisibility();
                 return;
             }
 
-            selectedMessages = new Set();
+            selectedMessages.clear();
+            const frag = document.createDocumentFragment();
+            updateResultCount(messages.length);
 
-            const fragment = document.createDocumentFragment();
-            const count = messages.length;
-            updateResultCount(count);
-
-            for (let idx = 0; idx < messages.length; idx++) {
-                const msg = messages[idx];
+            for (let i = 0; i < messages.length; i++) {
+                const msg = messages[i];
                 const div = document.createElement('div');
                 div.className = 'convo-item';
-                div.setAttribute('data-msg-idx', idx);
 
                 const meta = document.createElement('div');
                 meta.className = 'msg-meta';
-                const dtSpan = document.createElement('span');
-                dtSpan.className = 'msg-datetime';
-                dtSpan.textContent = `${msg.displayDate || msg.rawDate} ${msg.displayTime || msg.rawTime}`;
-                const spSpan = document.createElement('span');
-                spSpan.className = 'msg-speaker';
-                spSpan.textContent = msg.speaker;
-                meta.appendChild(dtSpan);
-                meta.appendChild(spSpan);
+                const dt = document.createElement('span');
+                dt.className = 'msg-datetime';
+                dt.textContent = `${msg.displayDate || msg.rawDate} ${msg.displayTime || msg.rawTime}`;
+                const sp = document.createElement('span');
+                sp.className = 'msg-speaker';
+                sp.textContent = msg.speaker;
+                meta.appendChild(dt);
+                meta.appendChild(sp);
 
-                const textDiv = document.createElement('div');
-                textDiv.className = 'msg-text';
-                const highlightedMsg = highlightText(msg.message, highlightNames);
-                textDiv.innerHTML = highlightedMsg;
+                const txt = document.createElement('div');
+                txt.className = 'msg-text';
+                txt.innerHTML = highlightText(msg.message, highlightNames);
 
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.className = 'msg-select';
-                checkbox.dataset.idx = idx;
-                checkbox.checked = false;
-                checkbox.addEventListener('change', (e) => {
-                    if (e.target.checked) {
-                        selectedMessages.add(msg);
-                        div.classList.add('selected');
-                    } else {
-                        selectedMessages.delete(msg);
-                        div.classList.remove('selected');
-                    }
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.className = 'msg-select';
+                cb.dataset.idx = i;
+                cb.checked = false;
+                cb.addEventListener('change', (e) => {
+                    if (e.target.checked) { selectedMessages.add(msg);
+                        div.classList.add('selected'); } else { selectedMessages.delete(msg);
+                        div.classList.remove('selected'); }
                     updateDeleteButtonVisibility();
                     saveState();
                 });
 
                 div.appendChild(meta);
-                div.appendChild(textDiv);
-                div.appendChild(checkbox);
-                fragment.appendChild(div);
+                div.appendChild(txt);
+                div.appendChild(cb);
+                frag.appendChild(div);
             }
             resultsContainer.innerHTML = '';
-            resultsContainer.appendChild(fragment);
+            resultsContainer.appendChild(frag);
             updateDeleteButtonVisibility();
         }
 
-        // ---------- PERFORM SEARCH ----------
+        // ── SEARCH ──
         function performSearch(save = true) {
-            if (!fileLoaded || parsedMessages.length === 0) {
+            if (!fileLoaded || !parsedMessages.length) {
                 resultsContainer.innerHTML =
-                    `<div class="empty-state">⚠️ please upload a valid chat log first.<br>formats: <code>[15/07/2025, 23:11:51] Samuel EA: text</code><br>or <code>6/6/26, 22:16 - Warriblood EA: text</code></div>`;
+                    `<div class="empty-state">upload a valid chat log first<br><span style="color:#94a3b8;">supports <code>[dd/mm/yyyy, HH:MM:SS] Speaker: text</code> or <code>m/d/yy, HH:MM - Speaker: text</code></span></div>`;
                 switchTab('results', false);
                 return;
             }
 
-            let name1Raw = name1Input.value.trim();
-            if (name1Raw === "") {
-                resultsContainer.innerHTML =
-                    `<div class="empty-state">❌ enter SPEAKER 1 (required)</div>`;
+            const n1 = name1Input.value.trim();
+            if (!n1) {
+                resultsContainer.innerHTML = `<div class="empty-state">enter speaker 1 (required)</div>`;
                 switchTab('results', false);
                 return;
             }
 
-            const name2Raw = name2Input.value.trim();
-            const startDateRaw = startDateInput.value.trim();
-            const endDateRaw = endDateInput.value.trim();
+            const n2 = name2Input.value.trim();
+            const fromRaw = startDateInput.value.trim();
+            const toRaw = endDateInput.value.trim();
 
-            let startDayMs = null,
-                endDayMs = null;
-            if (startDateRaw !== "") {
-                startDayMs = parseDateUniversal(startDateRaw);
-                if (startDayMs === null) {
-                    resultsContainer.innerHTML =
-                        `<div class="empty-state">❌ invalid FROM date → use dd/mm/yyyy or m/d/yy</div>`;
-                    switchTab('results', false);
-                    return;
-                }
-            }
-            if (endDateRaw !== "") {
-                endDayMs = parseDateUniversal(endDateRaw);
-                if (endDayMs === null) {
-                    resultsContainer.innerHTML =
-                        `<div class="empty-state">❌ invalid TO date → use dd/mm/yyyy or m/d/yy</div>`;
-                    switchTab('results', false);
-                    return;
-                }
-            }
-            if (startDayMs !== null && endDayMs !== null && startDayMs > endDayMs) {
-                resultsContainer.innerHTML =
-                    `<div class="empty-state">⛔ from date cannot be after to date</div>`;
-                switchTab('results', false);
-                return;
-            }
+            let fromMs = null,
+                toMs = null;
+            if (fromRaw) { fromMs = parseDateUniversal(fromRaw); if (fromMs === null) { resultsContainer.innerHTML =
+                        `<div class="empty-state">invalid from date · use dd/mm/yyyy</div>`; switchTab('results', false); return; } }
+            if (toRaw) { toMs = parseDateUniversal(toRaw); if (toMs === null) { resultsContainer.innerHTML =
+                        `<div class="empty-state">invalid to date · use dd/mm/yyyy</div>`; switchTab('results', false); return; } }
+            if (fromMs !== null && toMs !== null && fromMs > toMs) { resultsContainer.innerHTML =
+                    `<div class="empty-state">from date cannot be after to date</div>`; switchTab('results', false); return; }
 
-            const name1Lower = name1Raw.toLowerCase();
-            const name2Lower = name2Raw.toLowerCase();
+            const n1l = n1.toLowerCase(),
+                n2l = n2.toLowerCase();
+            let filtered = parsedMessages.filter(m => n2 ? m.speakerLower === n1l || m.speakerLower === n2l : m
+            .speakerLower === n1l);
 
-            let filtered = parsedMessages.filter(msg => {
-                const sp = msg.speakerLower;
-                if (name2Raw === "") return sp === name1Lower;
-                return sp === name1Lower || sp === name2Lower;
-            });
-
-            if (startDayMs !== null || endDayMs !== null) {
-                filtered = filtered.filter(msg => {
-                    const d = msg.dayTimestamp;
-                    if (startDayMs !== null && d < startDayMs) return false;
-                    if (endDayMs !== null && d > endDayMs) return false;
+            if (fromMs !== null || toMs !== null) {
+                filtered = filtered.filter(m => {
+                    const d = m.dayTimestamp;
+                    if (fromMs !== null && d < fromMs) return false;
+                    if (toMs !== null && d > toMs) return false;
                     return true;
                 });
             }
 
             filtered.sort((a, b) => a.fullTimestamp - b.fullTimestamp);
 
-            const highlightSet = new Set();
-            if (name1Raw) highlightSet.add(name1Raw);
-            if (name2Raw) highlightSet.add(name2Raw);
-            const highlightNames = Array.from(highlightSet);
+            const hl = [];
+            if (n1) hl.push(n1);
+            if (n2) hl.push(n2);
+            const uniqueHl = Array.from(new Set(hl));
 
             currentDisplayedMessages = filtered;
-            currentHighlightNames = highlightNames;
+            currentHighlightNames = uniqueHl;
             selectedMessages.clear();
 
             renderResults(currentDisplayedMessages, currentHighlightNames);
 
-            // restore saved selections
             const saved = loadState();
             if (saved && saved.selectedIds && saved.selectedIds.length) {
-                const savedIds = new Set(saved.selectedIds);
-                const msgEls = resultsContainer.querySelectorAll('.convo-item');
+                const ids = new Set(saved.selectedIds);
+                const els = resultsContainer.querySelectorAll('.convo-item');
                 for (let i = 0; i < currentDisplayedMessages.length; i++) {
-                    const msg = currentDisplayedMessages[i];
-                    const id = getMessageId(msg);
-                    if (savedIds.has(id)) {
-                        selectedMessages.add(msg);
-                        const el = msgEls[i];
-                        if (el) {
-                            const cb = el.querySelector('.msg-select');
-                            if (cb) cb.checked = true;
-                            el.classList.add('selected');
-                        }
+                    const m = currentDisplayedMessages[i];
+                    if (ids.has(getMessageId(m))) {
+                        selectedMessages.add(m);
+                        const el = els[i];
+                        if (el) { const cb = el.querySelector('.msg-select'); if (cb) cb.checked = true;
+                            el.classList.add('selected'); }
                     }
                 }
                 updateDeleteButtonVisibility();
@@ -1125,7 +1267,7 @@
             if (save) saveState();
         }
 
-        // ---------- FILE LOADING ----------
+        // ── FILE LOADING ──
         function loadFile(file) {
             if (!file) { resetFileState(); return; }
             fileNameSpan.textContent = file.name;
@@ -1133,45 +1275,43 @@
             reader.onload = (e) => {
                 const content = e.target.result;
                 rawFileContent = content;
-                const { messages, skippedLines } = parseFileWithContinuations(content);
+                const { messages } = parseFileWithContinuations(content);
                 parsedMessages = messages;
                 fileLoaded = true;
-                updateStatsDisplay(parsedMessages.length, skippedLines);
+                updateStatsDisplay(parsedMessages.length);
                 currentDisplayedMessages = [];
                 currentHighlightNames = [];
                 selectedMessages.clear();
                 resetSearchResults();
-                if (parsedMessages.length === 0) {
+                if (!parsedMessages.length) {
                     resultsContainer.innerHTML =
-                        `<div class="empty-state">⚠️ No valid messages found.<br>Use: <code>[15/07/2025, 23:11:51] Samuel EA: message</code><br>or <code>6/6/26, 22:16 - Warriblood EA: message</code><br>Continuation lines are merged automatically.</div>`;
+                        `<div class="empty-state">no valid messages found<br><span style="color:#94a3b8;">check format: <code>[dd/mm/yyyy, HH:MM:SS] Speaker: text</code> or <code>m/d/yy, HH:MM - Speaker: text</code></span></div>`;
                 } else {
-                    if (resultsContainer) {
-                        resultsContainer.innerHTML =
-                            `<div class="empty-state">📄 File loaded (${parsedMessages.length} messages).<br>Go to Search tab, enter names + date range → click Search.<br>Results shown here with ☑️ select + 🗑️ delete selected. No footer on this tab.</div>`;
-                    }
+                    resultsContainer.innerHTML =
+                        `<div class="empty-state">${parsedMessages.length} messages loaded · enter speaker + date → search</div>`;
                 }
                 updateDeleteButtonVisibility();
                 restoreIndicator.style.display = 'inline-block';
                 saveState();
             };
-            reader.onerror = () => { alert("file read error");
+            reader.onerror = () => { alert('file read error');
                 resetFileState(); };
-            reader.readAsText(file, "UTF-8");
+            reader.readAsText(file, 'UTF-8');
         }
 
         function resetFileState() {
             parsedMessages = [];
             fileLoaded = false;
             rawFileContent = null;
-            fileNameSpan.textContent = "no file selected";
-            updateStatsDisplay(0, 0);
-            fileInput.value = "";
+            fileNameSpan.textContent = 'none';
+            updateStatsDisplay(0);
+            fileInput.value = '';
             currentDisplayedMessages = [];
             currentHighlightNames = [];
             selectedMessages.clear();
             resetSearchResults();
             resultsContainer.innerHTML =
-                `<div class="empty-state">📂 upload .txt → supports two formats:<br><code>[dd/mm/yyyy, HH:MM:SS] Speaker: message</code><br><code>m/d/yy, HH:MM - Speaker: message</code><br>multi‑line supported · bold yellow highlights · selectable + deletable results (Results tab)<br>Footer hidden for full-height view.</div>`;
+                `<div class="empty-state">upload a log · search → results appear here<br><span style="color:#94a3b8;">select messages with checkboxes · delete selected</span></div>`;
             updateDeleteButtonVisibility();
             restoreIndicator.style.display = 'none';
             clearSavedState();
@@ -1185,9 +1325,9 @@
             startDateInput.value = '';
             endDateInput.value = '';
             resultsContainer.innerHTML =
-                `<div class="empty-state">📂 file cleared. upload new log.</div>`;
-            parseStatsSpan.innerHTML = `📄 no file`;
-            fileNameSpan.textContent = "no file selected";
+                `<div class="empty-state">file cleared · upload a new log</div>`;
+            parseStatsSpan.textContent = 'no file';
+            fileNameSpan.textContent = 'none';
             fileLoaded = false;
             parsedMessages = [];
             rawFileContent = null;
@@ -1200,156 +1340,97 @@
             switchTab('search', false);
         }
 
-        // ---------- DELETE SELECTED ----------
+        // ── DELETE ──
         function deleteSelectedMessages() {
-            if (selectedMessages.size === 0) return;
+            if (!selectedMessages.size) return;
             const toDelete = new Set(selectedMessages);
-            currentDisplayedMessages = currentDisplayedMessages.filter(msg => !toDelete.has(msg));
+            currentDisplayedMessages = currentDisplayedMessages.filter(m => !toDelete.has(m));
             selectedMessages.clear();
             renderResults(currentDisplayedMessages, currentHighlightNames);
             updateDeleteButtonVisibility();
             saveState();
         }
 
-        // ---------- RESTORE FROM SAVED STATE ----------
+        // ── RESTORE ──
         function restoreFromSaved() {
             const saved = loadState();
             if (!saved) return false;
-
             restoreInProgress = true;
             let restored = false;
-
             try {
-                // restore inputs first (always)
                 if (saved.name1 !== undefined) name1Input.value = saved.name1 || '';
                 if (saved.name2 !== undefined) name2Input.value = saved.name2 || '';
                 if (saved.startDate !== undefined) startDateInput.value = saved.startDate || '';
                 if (saved.endDate !== undefined) endDateInput.value = saved.endDate || '';
 
-                // restore file content if present
                 if (saved.fileContent && saved.fileName) {
-                    const content = saved.fileContent;
-                    const { messages, skippedLines } = parseFileWithContinuations(content);
-                    if (messages.length > 0) {
+                    const { messages } = parseFileWithContinuations(saved.fileContent);
+                    if (messages.length) {
                         parsedMessages = messages;
                         fileLoaded = true;
-                        rawFileContent = content;
+                        rawFileContent = saved.fileContent;
                         fileNameSpan.textContent = saved.fileName;
-                        updateStatsDisplay(parsedMessages.length, skippedLines);
+                        updateStatsDisplay(parsedMessages.length);
                         resetSearchResults();
                         restoreIndicator.style.display = 'inline-block';
                         restored = true;
                     } else {
-                        // file content existed but no valid messages – show error
                         fileLoaded = false;
                         rawFileContent = null;
                         fileNameSpan.textContent = saved.fileName + ' (invalid)';
-                        updateStatsDisplay(0, 0);
+                        updateStatsDisplay(0);
                         resetSearchResults();
                         restoreIndicator.style.display = 'none';
                     }
                 }
 
-                // if we have a file loaded, and speaker1 is set, run search to restore results
-                if (fileLoaded && parsedMessages.length > 0) {
-                    const name1 = name1Input.value.trim();
-                    if (name1) {
-                        performSearch(false); // this will also restore selections from saved state
-                    } else {
-                        // file loaded but no speaker1, just show file loaded state
-                        resultsContainer.innerHTML =
-                            `<div class="empty-state">📄 File restored (${parsedMessages.length} messages).<br>Enter speaker names and search.</div>`;
-                        updateResultCount(0);
-                        updateDeleteButtonVisibility();
-                    }
+                if (fileLoaded && parsedMessages.length && name1Input.value.trim()) {
+                    performSearch(false);
+                } else if (fileLoaded && parsedMessages.length) {
+                    resultsContainer.innerHTML =
+                        `<div class="empty-state">${parsedMessages.length} messages restored · enter speaker + date → search</div>`;
+                    updateResultCount(0);
+                    updateDeleteButtonVisibility();
                 }
 
-                // restore active tab
-                if (saved.activeTab) {
-                    switchTab(saved.activeTab, false);
-                }
+                if (saved.activeTab) switchTab(saved.activeTab, false);
+                const active = document.querySelector('.tab-btn.active')?.dataset?.tab || 'search';
+                if (active === 'results') mainFooter?.classList.add('hide-footer');
+                else mainFooter?.classList.remove('hide-footer');
 
-                // ensure footer visibility
-                const activeTab = document.querySelector('.tab-btn.active')?.dataset?.tab || 'search';
-                if (activeTab === 'results') {
-                    if (mainFooter) mainFooter.classList.add('hide-footer');
-                } else {
-                    if (mainFooter) mainFooter.classList.remove('hide-footer');
-                }
-
-                // if nothing restored, return false
-                if (!restored && !saved.name1 && !saved.name2 && !saved.startDate && !saved.endDate) {
-                    restored = false; // no meaningful state
-                } else {
-                    restored = true;
-                }
-
-            } catch (e) {
-                console.warn('restoreFromSaved error:', e);
-                restored = false;
-            } finally {
-                restoreInProgress = false;
-                // if we restored something, save state again to ensure consistency (but avoid recursion)
-                if (restored) {
-                    // don't save immediately, let user interactions save
-                }
-            }
-
+                if (!restored && !saved.name1 && !saved.name2 && !saved.startDate && !saved.endDate) restored = false;
+                else restored = true;
+            } catch (_) { restored = false; } finally { restoreInProgress = false; }
             return restored;
         }
 
-        // ---------- EVENT LISTENERS ----------
+        // ── EVENTS ──
         uploadBtn.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) loadFile(file);
-            else resetFileState();
-        });
+        fileInput.addEventListener('change', (e) => { const f = e.target.files[0]; f ? loadFile(f) : resetFileState(); });
         clearFileBtn.addEventListener('click', clearFileAndReset);
         searchBtn.addEventListener('click', () => performSearch(true));
         deleteSelectedBtn.addEventListener('click', deleteSelectedMessages);
 
-        // Save on any input change, regardless of fileLoaded
-        [name1Input, name2Input, startDateInput, endDateInput].forEach(field => {
-            field.addEventListener('input', () => {
-                saveState();
-            });
-            field.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    performSearch(true);
-                }
-            });
+        [name1Input, name2Input, startDateInput, endDateInput].forEach(f => {
+            f.addEventListener('input', () => saveState());
+            f.addEventListener('keypress', (e) => { if (e.key === 'Enter') { e.preventDefault();
+                    performSearch(true); } });
         });
 
-        // ---------- INIT ----------
-        // initial state
+        // ── INIT ──
         resetSearchResults();
         updateDeleteButtonVisibility();
-
-        // try to restore from saved state
         const restored = restoreFromSaved();
-
         if (!restored) {
-            // show default empty state with persistence notice
             resultsContainer.innerHTML =
-                `<div class="empty-state">📂 upload .txt → supports two formats:<br><code>[dd/mm/yyyy, HH:MM:SS] Speaker: message</code><br><code>m/d/yy, HH:MM - Speaker: message</code><br>multi‑line supported · bold yellow highlights · selectable + deletable results (Results tab)<br>Footer hidden for full-height view.<br><span style="color:#34d399;">💾 all inputs &amp; selections auto‑saved</span></div>`;
+                `<div class="empty-state">upload a log · search → results appear here<br><span style="color:#94a3b8;">select messages with checkboxes · delete selected · auto‑saved</span></div>`;
         }
-
-        // ensure footer state matches current tab
         const activeTab = document.querySelector('.tab-btn.active')?.dataset?.tab || 'search';
-        if (activeTab === 'results') {
-            if (mainFooter) mainFooter.classList.add('hide-footer');
-        } else {
-            if (mainFooter) mainFooter.classList.remove('hide-footer');
-        }
+        if (activeTab === 'results') mainFooter?.classList.add('hide-footer');
+        else mainFooter?.classList.remove('hide-footer');
 
-        // save on page unload
-        window.addEventListener('beforeunload', () => {
-            saveState();
-        });
-
-        console.log('🔍 edge searcher ready · 💾 auto-persist enabled');
+        window.addEventListener('beforeunload', () => saveState());
+        console.log('⌕ log search ready');
     </script>
 </body>
 </html>
