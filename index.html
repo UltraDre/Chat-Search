@@ -426,6 +426,16 @@
             transition: background 0.2s, color 0.2s;
         }
 
+        /* speaker label colors – text only, no background */
+        .msg-speaker.speaker1-label {
+            background: transparent;
+            color: #b45309;
+        }
+        .msg-speaker.speaker2-label {
+            background: transparent;
+            color: #065f46;
+        }
+
         .msg-text {
             font-size: 0.8rem;
             line-height: 1.5;
@@ -435,6 +445,7 @@
             transition: color 0.2s;
         }
 
+        /* ── HIGHLIGHT COLORS ── */
         .msg-text mark {
             background: #fef3c7;
             color: #92400e;
@@ -442,6 +453,11 @@
             padding: 0 2px;
             border-radius: 3px;
             transition: background 0.2s, color 0.2s;
+        }
+
+        .msg-text mark.speaker2 {
+            background: #d1fae5;
+            color: #065f46;
         }
 
         .msg-select {
@@ -714,16 +730,28 @@
                 background: #111827;
                 color: #7dd3fc;
             }
-            .msg-speaker {
-                background: #111827;
-                color: #facc15;
+
+            /* dark speaker labels – text only */
+            .msg-speaker.speaker1-label {
+                background: transparent;
+                color: #fbbf24;
             }
+            .msg-speaker.speaker2-label {
+                background: transparent;
+                color: #34d399;
+            }
+
             .msg-text {
                 color: #e2e8f0;
             }
+
             .msg-text mark {
                 background: #fef3c7;
                 color: #92400e;
+            }
+            .msg-text mark.speaker2 {
+                background: #065f46;
+                color: #a7f3d0;
             }
 
             .msg-select {
@@ -810,8 +838,8 @@
                         &nbsp;·&nbsp; <code>[15/07/2025, 23:11:51] Speaker: text</code>
                         &nbsp;·&nbsp; <code>6/6/26, 22:16 - Speaker: text</code>
                         <br>
-                        <span class="accent">↳</span> multi‑line merged &nbsp;·&nbsp; <span class="highlight">bold yellow</span> matches
-                        &nbsp;·&nbsp; <span class="green">☑️ select &amp; delete</span>
+                        <span class="accent">↳</span> multi‑line merged &nbsp;·&nbsp; <span class="highlight">speaker 1 yellow</span>
+                        &nbsp;·&nbsp; <span class="green">speaker 2 green</span>
                         &nbsp;·&nbsp; <span style="color:#64748b;">💾 auto‑saved</span>
                     </div>
                 </div>
@@ -831,7 +859,7 @@
             </div>
         </div>
 
-        <footer id="mainFooter">dual format · continuation lines · bold highlights · select &amp; delete · auto‑persist</footer>
+        <footer id="mainFooter">dual format · continuation lines · speaker 1 <span style="color:#b45309;font-weight:600;">yellow</span> · speaker 2 <span style="color:#065f46;font-weight:600;">green</span> · select &amp; delete · auto‑persist</footer>
     </div>
 
     <script>
@@ -839,7 +867,8 @@
         let parsedMessages = [];
         let fileLoaded = false;
         let currentDisplayedMessages = [];
-        let currentHighlightNames = [];
+        let currentSpeaker1 = null;
+        let currentSpeaker2 = null;
         let selectedMessages = new Set();
         let rawFileContent = null;
         let restoreInProgress = false;
@@ -921,19 +950,32 @@
         // ── HELPERS ──
         function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
-        function highlightText(text, names) {
+        // ── HIGHLIGHT with speaker colors ──
+        function highlightText(text, speaker1, speaker2) {
             let out = text.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
-            if (!names || !names.length) return out.replace(/\n/g, '<br>');
-            const unique = [];
+
+            const entries = [];
+            if (speaker1 && speaker1.length) entries.push({ name: speaker1, cls: '' });
+            if (speaker2 && speaker2.length) entries.push({ name: speaker2, cls: 'speaker2' });
+
+            // If same name appears in both, keep only speaker1 (yellow)
             const seen = new Set();
-            for (const n of names) { const l = n.toLowerCase(); if (!seen.has(l)) { seen.add(l);
-                    unique.push(n); } }
-            unique.sort((a, b) => b.length - a.length);
-            for (const n of unique) {
-                if (!n.length) continue;
-                const re = new RegExp(`(${escapeRegex(n)})`, 'gi');
-                out = out.replace(re, '<mark>$1</mark>');
+            const unique = [];
+            for (const e of entries) {
+                const key = e.name.toLowerCase();
+                if (!seen.has(key)) { seen.add(key);
+                    unique.push(e); }
             }
+            // Sort by length descending so longer names (substrings) are handled first
+            unique.sort((a, b) => b.name.length - a.name.length);
+
+            for (const { name, cls } of unique) {
+                if (!name.length) continue;
+                const re = new RegExp(`(${escapeRegex(name)})`, 'gi');
+                const clsAttr = cls ? ` class="${cls}"` : '';
+                out = out.replace(re, `<mark${clsAttr}>$1</mark>`);
+            }
+
             return out.replace(/\n/g, '<br>');
         }
 
@@ -1093,7 +1135,8 @@
 
         function resetSearchResults() {
             currentDisplayedMessages = [];
-            currentHighlightNames = [];
+            currentSpeaker1 = null;
+            currentSpeaker2 = null;
             selectedMessages.clear();
             if (resultsContainer) {
                 if (fileLoaded && parsedMessages.length > 0) {
@@ -1127,7 +1170,7 @@
         }
 
         // ── RENDER ──
-        function renderResults(messages, highlightNames) {
+        function renderResults(messages, speaker1, speaker2) {
             if (!messages.length) {
                 if (fileLoaded && parsedMessages.length) {
                     resultsContainer.innerHTML =
@@ -1161,12 +1204,18 @@
                 const sp = document.createElement('span');
                 sp.className = 'msg-speaker';
                 sp.textContent = msg.speaker;
+                // Apply speaker label colors (text only)
+                if (speaker1 && msg.speaker.toLowerCase() === speaker1.toLowerCase()) {
+                    sp.classList.add('speaker1-label');
+                } else if (speaker2 && msg.speaker.toLowerCase() === speaker2.toLowerCase()) {
+                    sp.classList.add('speaker2-label');
+                }
                 meta.appendChild(dt);
                 meta.appendChild(sp);
 
                 const txt = document.createElement('div');
                 txt.className = 'msg-text';
-                txt.innerHTML = highlightText(msg.message, highlightNames);
+                txt.innerHTML = highlightText(msg.message, speaker1, speaker2);
 
                 const cb = document.createElement('input');
                 cb.type = 'checkbox';
@@ -1236,16 +1285,16 @@
 
             filtered.sort((a, b) => a.fullTimestamp - b.fullTimestamp);
 
-            const hl = [];
-            if (n1) hl.push(n1);
-            if (n2) hl.push(n2);
-            const uniqueHl = Array.from(new Set(hl));
+            // Store speaker names for highlighting
+            const s1 = n1 || null;
+            const s2 = n2 || null;
 
             currentDisplayedMessages = filtered;
-            currentHighlightNames = uniqueHl;
+            currentSpeaker1 = s1;
+            currentSpeaker2 = s2;
             selectedMessages.clear();
 
-            renderResults(currentDisplayedMessages, currentHighlightNames);
+            renderResults(currentDisplayedMessages, currentSpeaker1, currentSpeaker2);
 
             const saved = loadState();
             if (saved && saved.selectedIds && saved.selectedIds.length) {
@@ -1280,7 +1329,8 @@
                 fileLoaded = true;
                 updateStatsDisplay(parsedMessages.length);
                 currentDisplayedMessages = [];
-                currentHighlightNames = [];
+                currentSpeaker1 = null;
+                currentSpeaker2 = null;
                 selectedMessages.clear();
                 resetSearchResults();
                 if (!parsedMessages.length) {
@@ -1307,7 +1357,8 @@
             updateStatsDisplay(0);
             fileInput.value = '';
             currentDisplayedMessages = [];
-            currentHighlightNames = [];
+            currentSpeaker1 = null;
+            currentSpeaker2 = null;
             selectedMessages.clear();
             resetSearchResults();
             resultsContainer.innerHTML =
@@ -1332,7 +1383,8 @@
             parsedMessages = [];
             rawFileContent = null;
             currentDisplayedMessages = [];
-            currentHighlightNames = [];
+            currentSpeaker1 = null;
+            currentSpeaker2 = null;
             selectedMessages.clear();
             updateDeleteButtonVisibility();
             restoreIndicator.style.display = 'none';
@@ -1346,7 +1398,7 @@
             const toDelete = new Set(selectedMessages);
             currentDisplayedMessages = currentDisplayedMessages.filter(m => !toDelete.has(m));
             selectedMessages.clear();
-            renderResults(currentDisplayedMessages, currentHighlightNames);
+            renderResults(currentDisplayedMessages, currentSpeaker1, currentSpeaker2);
             updateDeleteButtonVisibility();
             saveState();
         }
