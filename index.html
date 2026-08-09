@@ -559,6 +559,15 @@
             color: #065f46;
         }
 
+        /* NEW: Blue highlight for the search keyword */
+        .msg-text mark.keyword {
+            background: transparent;
+            color: #2563eb;
+            font-weight: 600;
+            padding: 0 2px;
+            border-radius: 0px;
+        }
+
         /* ── No separate timestamp inside bubble ── */
         .msg-timestamp {
             display: none;
@@ -953,7 +962,7 @@
                 text-shadow: 0 0 4px rgba(0, 0, 0, 0.7);
             }
 
-            /* UPDATED: No yellow background, yellow text in Dark Mode as well */
+            /* Dark mode speaker highlighting */
             .msg-text mark {
                 background: transparent;
                 color: #facc15;
@@ -961,6 +970,12 @@
             .msg-text mark.speaker2 {
                 background: #065f46;
                 color: #a7f3d0;
+            }
+
+            /* NEW: Dark mode blue keyword highlight */
+            .msg-text mark.keyword {
+                background: transparent;
+                color: #60a5fa;
             }
 
             .msg-checkbox-wrap .msg-select {
@@ -1044,6 +1059,11 @@
                             <label>to</label>
                             <input type="text" id="endDate" placeholder="dd/mm/yyyy" autocomplete="off">
                         </div>
+                        <!-- NEW: Contains text search box -->
+                        <div class="field-group">
+                            <label>contains (search all)</label>
+                            <input type="text" id="searchText" placeholder="any word or sentence" autocomplete="off">
+                        </div>
                         <div class="field-group">
                             <label>&nbsp;</label>
                             <button id="searchBtn">search</button>
@@ -1076,7 +1096,7 @@
             </div>
         </div>
 
-        <footer id="mainFooter">dual format · continuation lines · speaker 1 <span style="color:#facc15;font-weight:600;">yellow</span> · speaker 2 <span style="color:#34d399;font-weight:600;">light green</span> · select &amp; delete · auto‑persist</footer>
+        <footer id="mainFooter">dual format · continuation lines · speaker 1 <span style="color:#facc15;font-weight:600;">yellow</span> · speaker 2 <span style="color:#34d399;font-weight:600;">light green</span> · search keyword <span style="color:#2563eb;font-weight:600;">blue</span> · select &amp; delete · auto‑persist</footer>
     </div>
 
     <script>
@@ -1086,6 +1106,7 @@
         let currentDisplayedMessages = [];
         let currentSpeaker1 = null;
         let currentSpeaker2 = null;
+        let currentKeyword = null;
         let selectedMessages = new Set();
         let rawFileContent = null;
         let restoreInProgress = false;
@@ -1100,6 +1121,7 @@
         const name2Input = document.getElementById('name2');
         const startDateInput = document.getElementById('startDate');
         const endDateInput = document.getElementById('endDate');
+        const searchTextInput = document.getElementById('searchText');
         const searchBtn = document.getElementById('searchBtn');
         const resultsContainer = document.getElementById('resultsContainer');
         const mainFooter = document.getElementById('mainFooter');
@@ -1130,6 +1152,7 @@
                     name2: name2Input.value,
                     startDate: startDateInput.value,
                     endDate: endDateInput.value,
+                    searchText: searchTextInput.value,
                     selectedIds: selIds,
                     activeTab: document.querySelector('.tab-btn.active')?.dataset?.tab || 'search',
                 };
@@ -1167,10 +1190,17 @@
         // ── HELPERS ──
         function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
-        // ── HIGHLIGHT with speaker colors ──
-        function highlightText(text, speaker1, speaker2) {
+        // ── HIGHLIGHT with speaker colors and keyword blue ──
+        function highlightText(text, speaker1, speaker2, keyword) {
             let out = text.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
 
+            // 1. Apply Keyword highlight FIRST (will be wrapped by speaker if they overlap, keeping speaker color priority)
+            if (keyword && keyword.length) {
+                const re = new RegExp(`(${escapeRegex(keyword)})`, 'gi');
+                out = out.replace(re, `<mark class="keyword">$1</mark>`);
+            }
+
+            // 2. Apply Speaker highlight
             const entries = [];
             if (speaker1 && speaker1.length) entries.push({ name: speaker1, cls: '' });
             if (speaker2 && speaker2.length) entries.push({ name: speaker2, cls: 'speaker2' });
@@ -1352,6 +1382,7 @@
             currentDisplayedMessages = [];
             currentSpeaker1 = null;
             currentSpeaker2 = null;
+            currentKeyword = null;
             selectedMessages.clear();
             if (resultsContainer) {
                 if (fileLoaded && parsedMessages.length > 0) {
@@ -1409,7 +1440,7 @@
         }
 
         // ── RENDER — WHATSAPP STYLE (no avatar, timestamp next to name, no "you") ──
-        function renderResults(messages, speaker1, speaker2) {
+        function renderResults(messages, speaker1, speaker2, keyword) {
             if (!messages.length) {
                 if (fileLoaded && parsedMessages.length) {
                     resultsContainer.innerHTML =
@@ -1442,6 +1473,7 @@
 
             const s1 = speaker1 || '';
             const s2 = speaker2 || '';
+            const kw = keyword || '';
 
             for (const key of sortedKeys) {
                 const dayMs = new Date(key + 'T00:00:00Z').getTime();
@@ -1531,7 +1563,7 @@
 
                     const txt = document.createElement('div');
                     txt.className = 'msg-text';
-                    txt.innerHTML = highlightText(msg.message, s1, s2);
+                    txt.innerHTML = highlightText(msg.message, s1, s2, kw);
                     bubble.appendChild(txt);
 
                     bubbleContainer.appendChild(bubble);
@@ -1602,13 +1634,16 @@
             }
 
             const n1 = name1Input.value.trim();
-            if (!n1) {
-                resultsContainer.innerHTML = `<div class="empty-state">enter speaker 1 (required)</div>`;
+            const n2 = name2Input.value.trim();
+            const keyword = searchTextInput.value.trim();
+
+            // Updated Validation: require either a speaker OR a keyword
+            if (!n1 && !keyword) {
+                resultsContainer.innerHTML = `<div class="empty-state">enter speaker 1 or a keyword to search all chats</div>`;
                 switchTab('results', false);
                 return;
             }
 
-            const n2 = name2Input.value.trim();
             const fromRaw = startDateInput.value.trim();
             const toRaw = endDateInput.value.trim();
 
@@ -1621,11 +1656,24 @@
             if (fromMs !== null && toMs !== null && fromMs > toMs) { resultsContainer.innerHTML =
                     `<div class="empty-state">from date cannot be after to date</div>`; switchTab('results', false); return; }
 
-            const n1l = n1.toLowerCase(),
-                n2l = n2.toLowerCase();
-            let filtered = parsedMessages.filter(m => n2 ? m.speakerLower === n1l || m.speakerLower === n2l : m
-                .speakerLower === n1l);
+            // Start with all messages
+            let filtered = parsedMessages;
 
+            // Apply speaker filter ONLY if a speaker is provided
+            if (n1) {
+                const n1l = n1.toLowerCase();
+                const n2l = n2.toLowerCase();
+                filtered = filtered.filter(m => n2 ? m.speakerLower === n1l || m.speakerLower === n2l : m
+                    .speakerLower === n1l);
+            }
+
+            // Apply keyword filter (searches across all speakers)
+            if (keyword) {
+                const kwl = keyword.toLowerCase();
+                filtered = filtered.filter(m => m.message.toLowerCase().includes(kwl));
+            }
+
+            // Apply date filter
             if (fromMs !== null || toMs !== null) {
                 filtered = filtered.filter(m => {
                     const d = m.dayTimestamp;
@@ -1643,9 +1691,10 @@
             currentDisplayedMessages = filtered;
             currentSpeaker1 = s1;
             currentSpeaker2 = s2;
+            currentKeyword = keyword;
             selectedMessages.clear();
 
-            renderResults(currentDisplayedMessages, currentSpeaker1, currentSpeaker2);
+            renderResults(currentDisplayedMessages, currentSpeaker1, currentSpeaker2, currentKeyword);
 
             switchTab('results', false);
             if (save) saveState();
@@ -1666,6 +1715,7 @@
                 currentDisplayedMessages = [];
                 currentSpeaker1 = null;
                 currentSpeaker2 = null;
+                currentKeyword = null;
                 selectedMessages.clear();
                 resetSearchResults();
                 if (!parsedMessages.length) {
@@ -1694,6 +1744,7 @@
             currentDisplayedMessages = [];
             currentSpeaker1 = null;
             currentSpeaker2 = null;
+            currentKeyword = null;
             selectedMessages.clear();
             resetSearchResults();
             resultsContainer.innerHTML =
@@ -1710,6 +1761,7 @@
             name2Input.value = '';
             startDateInput.value = '';
             endDateInput.value = '';
+            searchTextInput.value = '';
             resultsContainer.innerHTML =
                 `<div class="empty-state">file cleared · upload a new log</div>`;
             parseStatsSpan.textContent = 'no file';
@@ -1720,6 +1772,7 @@
             currentDisplayedMessages = [];
             currentSpeaker1 = null;
             currentSpeaker2 = null;
+            currentKeyword = null;
             selectedMessages.clear();
             updateDeleteButtonVisibility();
             restoreIndicator.style.display = 'none';
@@ -1733,7 +1786,7 @@
             const toDelete = new Set(selectedMessages);
             currentDisplayedMessages = currentDisplayedMessages.filter(m => !toDelete.has(m));
             selectedMessages.clear();
-            renderResults(currentDisplayedMessages, currentSpeaker1, currentSpeaker2);
+            renderResults(currentDisplayedMessages, currentSpeaker1, currentSpeaker2, currentKeyword);
             updateDeleteButtonVisibility();
             saveState();
         }
@@ -1749,6 +1802,7 @@
                 if (saved.name2 !== undefined) name2Input.value = saved.name2 || '';
                 if (saved.startDate !== undefined) startDateInput.value = saved.startDate || '';
                 if (saved.endDate !== undefined) endDateInput.value = saved.endDate || '';
+                if (saved.searchText !== undefined) searchTextInput.value = saved.searchText || '';
 
                 if (saved.fileContent && saved.fileName) {
                     const { messages } = parseFileWithContinuations(saved.fileContent);
@@ -1771,11 +1825,11 @@
                     }
                 }
 
-                if (fileLoaded && parsedMessages.length && name1Input.value.trim()) {
+                if (fileLoaded && parsedMessages.length && (name1Input.value.trim() || searchTextInput.value.trim())) {
                     performSearch(false);
                 } else if (fileLoaded && parsedMessages.length) {
                     resultsContainer.innerHTML =
-                        `<div class="empty-state">${parsedMessages.length} messages restored · enter speaker + date → search</div>`;
+                        `<div class="empty-state">${parsedMessages.length} messages restored · enter speaker or keyword → search</div>`;
                     updateResultCount(0);
                     updateDeleteButtonVisibility();
                 }
@@ -1785,7 +1839,7 @@
                 if (active === 'results') mainFooter?.classList.add('hide-footer');
                 else mainFooter?.classList.remove('hide-footer');
 
-                if (!restored && !saved.name1 && !saved.name2 && !saved.startDate && !saved.endDate) restored = false;
+                if (!restored && !saved.name1 && !saved.name2 && !saved.startDate && !saved.endDate && !saved.searchText) restored = false;
                 else restored = true;
             } catch (_) { restored = false; } finally { restoreInProgress = false; }
             return restored;
@@ -1798,7 +1852,7 @@
         searchBtn.addEventListener('click', () => performSearch(true));
         deleteSelectedBtn.addEventListener('click', deleteSelectedMessages);
 
-        [name1Input, name2Input, startDateInput, endDateInput].forEach(f => {
+        [name1Input, name2Input, startDateInput, endDateInput, searchTextInput].forEach(f => {
             f.addEventListener('input', () => saveState());
             f.addEventListener('keypress', (e) => { if (e.key === 'Enter') { e.preventDefault();
                     performSearch(true); } });
