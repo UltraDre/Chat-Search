@@ -497,7 +497,7 @@
             font-weight: 600;
         }
         .msg-speaker-name .highlight-s2 {
-            color: #34d399;  /* light green */
+            color: #00ff00;  /* VERY bright green */
             background: transparent;
             font-weight: 600;
         }
@@ -544,7 +544,7 @@
             word-break: break-word;
         }
 
-        /* UPDATED: Removed yellow background, changed text to yellow for Speaker 1 */
+        /* Speaker 1: Yellow text */
         .msg-text mark {
             background: transparent;
             color: #facc15;
@@ -554,12 +554,13 @@
             transition: color 0.2s;
         }
 
+        /* Speaker 2: VERY bright green text */
         .msg-text mark.speaker2 {
             background: #d1fae5;
-            color: #065f46;
+            color: #00ff00;
         }
 
-        /* NEW: Blue highlight for the search keyword */
+        /* Keyword highlight: Blue */
         .msg-text mark.keyword {
             background: transparent;
             color: #2563eb;
@@ -947,13 +948,13 @@
             .msg-wrapper.sent .msg-speaker-name {
                 color: #8ca3c0;
             }
-            /* Dark mode speaker colors — keep them bright */
+            /* Dark mode speaker colors */
             .msg-speaker-name .highlight-s1 {
                 color: #facc15;
                 background: transparent;
             }
             .msg-speaker-name .highlight-s2 {
-                color: #34d399;
+                color: #00ff00; /* VERY bright green in dark mode */
                 background: transparent;
             }
 
@@ -969,10 +970,9 @@
             }
             .msg-text mark.speaker2 {
                 background: #065f46;
-                color: #a7f3d0;
+                color: #00ff00; /* VERY bright green in dark mode */
             }
 
-            /* NEW: Dark mode blue keyword highlight */
             .msg-text mark.keyword {
                 background: transparent;
                 color: #60a5fa;
@@ -1059,7 +1059,6 @@
                             <label>to</label>
                             <input type="text" id="endDate" placeholder="dd/mm/yyyy" autocomplete="off">
                         </div>
-                        <!-- NEW: Contains text search box -->
                         <div class="field-group">
                             <label>contains (search all)</label>
                             <input type="text" id="searchText" placeholder="any word or sentence" autocomplete="off">
@@ -1076,7 +1075,8 @@
                         &nbsp;·&nbsp; <code>6/6/26, 22:16 - Speaker: text</code>
                         <br>
                         <span class="accent">↳</span> multi‑line merged &nbsp;·&nbsp; <span class="highlight">speaker 1 yellow</span>
-                        &nbsp;·&nbsp; <span class="green">speaker 2 light green</span>
+                        &nbsp;·&nbsp; <span style="color:#00ff00;font-weight:600;">speaker 2 bright green</span>
+                        &nbsp;·&nbsp; <span style="color:#2563eb;font-weight:600;">keyword blue</span>
                         &nbsp;·&nbsp; <span style="color:#64748b;">💾 auto‑saved</span>
                     </div>
                 </div>
@@ -1096,7 +1096,7 @@
             </div>
         </div>
 
-        <footer id="mainFooter">dual format · continuation lines · speaker 1 <span style="color:#facc15;font-weight:600;">yellow</span> · speaker 2 <span style="color:#34d399;font-weight:600;">light green</span> · search keyword <span style="color:#2563eb;font-weight:600;">blue</span> · select &amp; delete · auto‑persist</footer>
+        <footer id="mainFooter">dual format · continuation lines · speaker 1 <span style="color:#facc15;font-weight:600;">yellow</span> · speaker 2 <span style="color:#00ff00;font-weight:600;">bright green</span> · keyword <span style="color:#2563eb;font-weight:600;">blue</span> · select &amp; delete · auto‑persist</footer>
     </div>
 
     <script>
