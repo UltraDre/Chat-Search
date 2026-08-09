@@ -306,13 +306,35 @@
             color: #065f46;
         }
 
-        /* ── Results ── */
+        /* ── RESULTS — WHATSAPP STYLE (no avatar) ── */
         .results-raw {
             width: 100%;
             flex: 1;
             display: flex;
             flex-direction: column;
             min-height: 0;
+            background: #e5ddd5;
+            border-radius: 20px;
+            overflow: hidden;
+            transition: background 0.3s;
+            position: relative;
+        }
+
+        .results-raw::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0.06;
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(0, 0, 0, 0.03) 0%, transparent 60%),
+                radial-gradient(circle at 80% 20%, rgba(0, 0, 0, 0.03) 0%, transparent 50%),
+                repeating-linear-gradient(45deg,
+                    transparent,
+                    transparent 20px,
+                    rgba(0, 0, 0, 0.01) 20px,
+                    rgba(0, 0, 0, 0.01) 21px);
+            pointer-events: none;
+            z-index: 0;
         }
 
         .results-header {
@@ -320,27 +342,33 @@
             align-items: center;
             gap: 0.8rem;
             flex-wrap: wrap;
-            margin-bottom: 14px;
-            padding: 0 0.2rem;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            transition: background 0.3s, border-color 0.3s;
         }
 
         .result-count-badge {
-            background: #f1f5f9;
+            background: rgba(0, 0, 0, 0.06);
             border-radius: 40px;
-            padding: 3px 14px;
+            padding: 4px 16px;
             font-size: 0.7rem;
             font-weight: 500;
-            color: #475569;
+            color: #1e293b;
             border: none;
             display: inline-block;
             transition: background 0.2s, color 0.2s;
         }
 
         .delete-selected-btn {
-            background: #fef2f2;
+            background: #fee2e2;
             border: 1px solid #fca5a5;
             color: #991b1b;
-            padding: 3px 14px;
+            padding: 4px 16px;
             border-radius: 40px;
             font-size: 0.7rem;
             font-weight: 500;
@@ -369,90 +397,161 @@
         .message-list {
             flex: 1;
             overflow-y: auto;
+            padding: 16px 20px 20px 20px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            padding: 0.2rem 0.2rem 0.2rem 0;
-            max-height: none;
-        }
-
-        .convo-item {
-            background: #ffffff;
-            border: 1px solid #eef2f6;
-            border-radius: 16px;
-            padding: 10px 14px 10px 16px;
-            transition: 0.05s linear;
+            gap: 2px;
             position: relative;
-            padding-right: 44px;
+            z-index: 1;
+            min-height: 300px;
         }
 
-        .convo-item:hover {
-            border-color: #d1d9e6;
-            background: #fafcfc;
-        }
-
-        .convo-item.selected {
-            border-color: #94a3b8;
-            background: #f8fafc;
-            box-shadow: 0 0 0 1px #94a3b8;
-        }
-
-        .msg-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: baseline;
-            margin-bottom: 4px;
-            font-size: 0.65rem;
-        }
-
-        .msg-datetime {
-            font-family: 'JetBrains Mono', monospace;
-            background: #f1f5f9;
-            padding: 1px 10px;
-            border-radius: 30px;
+        /* ── Date divider ── */
+        .date-divider {
+            text-align: center;
+            margin: 12px 0 16px 0;
+            font-size: 0.7rem;
             font-weight: 500;
-            color: #475569;
-            transition: background 0.2s, color 0.2s;
+            color: #6b7280;
+            letter-spacing: 0.3px;
+            position: relative;
         }
 
-        .msg-speaker {
+        .date-divider span {
+            background: rgba(225, 225, 225, 0.7);
+            backdrop-filter: blur(4px);
+            padding: 4px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+
+        /* ── Message wrapper ── */
+        .msg-wrapper {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            margin-bottom: 2px;
+            max-width: 100%;
+            position: relative;
+        }
+
+        .msg-wrapper.sent {
+            justify-content: flex-end;
+            padding-left: 50px;
+        }
+
+        .msg-wrapper.received {
+            justify-content: flex-start;
+            padding-right: 50px;
+        }
+
+        /* ── No avatar ── */
+        .msg-avatar {
+            display: none;
+        }
+
+        /* ── Bubble container ── */
+        .bubble-container {
+            display: flex;
+            flex-direction: column;
+            max-width: 75%;
+            min-width: 60px;
+            position: relative;
+        }
+
+        .msg-wrapper.sent .bubble-container {
+            align-items: flex-end;
+        }
+        .msg-wrapper.received .bubble-container {
+            align-items: flex-start;
+        }
+
+        /* ── Speaker name + timestamp ── */
+        .msg-speaker-name {
+            font-size: 0.7rem;
+            font-weight: 500;
+            padding: 0 4px 2px 4px;
+            color: #6b7280;
+            transition: color 0.3s;
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .msg-wrapper.received .msg-speaker-name {
+            padding-left: 0;
+        }
+
+        .msg-wrapper.sent .msg-speaker-name {
+            padding-right: 0;
+            justify-content: flex-end;
+            color: #4b5563;
+        }
+
+        /* Speaker text colors — no background */
+        .msg-speaker-name .highlight-s1 {
+            color: #facc15;  /* bright yellow */
+            background: transparent;
             font-weight: 600;
-            background: #f1f5f9;
-            padding: 1px 10px;
-            border-radius: 30px;
-            color: #0f172a;
-            font-size: 0.65rem;
-            transition: background 0.2s, color 0.2s;
+        }
+        .msg-speaker-name .highlight-s2 {
+            color: #34d399;  /* light green */
+            background: transparent;
+            font-weight: 600;
         }
 
-        /* speaker label colors – text only, no background */
-        .msg-speaker.speaker1-label {
-            background: transparent;
-            color: #b45309;
+        /* Timestamp inside name line — white with shadow */
+        .msg-timestamp-inline {
+            color: #ffffff;
+            text-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+            font-size: 0.6rem;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+            white-space: nowrap;
+            transition: color 0.3s;
         }
-        .msg-speaker.speaker2-label {
-            background: transparent;
-            color: #065f46;
+
+        /* ── Bubble ── */
+        .bubble {
+            padding: 8px 12px 6px 12px;
+            border-radius: 12px;
+            word-wrap: break-word;
+            position: relative;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+            transition: background 0.25s, color 0.25s, box-shadow 0.25s;
+            width: 100%;
+        }
+
+        .msg-wrapper.sent .bubble {
+            background: #d9fdd3;
+            color: #1e293b;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg-wrapper.received .bubble {
+            background: #ffffff;
+            color: #1e293b;
+            border-bottom-left-radius: 4px;
+            border: 1px solid rgba(0, 0, 0, 0.04);
         }
 
         .msg-text {
-            font-size: 0.8rem;
+            font-size: 0.95rem;
             line-height: 1.5;
-            color: #1e293b;
             white-space: pre-wrap;
             word-break: break-word;
-            transition: color 0.2s;
         }
 
-        /* ── HIGHLIGHT COLORS ── */
+        /* UPDATED: Removed yellow background, changed text to yellow for Speaker 1 */
         .msg-text mark {
-            background: #fef3c7;
-            color: #92400e;
+            background: transparent;
+            color: #facc15;
             font-weight: 600;
             padding: 0 2px;
-            border-radius: 3px;
-            transition: background 0.2s, color 0.2s;
+            border-radius: 0px;
+            transition: color 0.2s;
         }
 
         .msg-text mark.speaker2 {
@@ -460,52 +559,106 @@
             color: #065f46;
         }
 
-        .msg-select {
-            position: absolute;
-            top: 12px;
-            right: 14px;
-            width: 15px;
-            height: 15px;
+        /* ── No separate timestamp inside bubble ── */
+        .msg-timestamp {
+            display: none;
+        }
+
+        /* ── Checkbox ── */
+        .msg-checkbox-wrap {
+            flex-shrink: 0;
+            display: flex;
+            align-items: flex-end;
+            padding-bottom: 6px;
+            position: relative;
+        }
+
+        .msg-checkbox-wrap .msg-select {
+            width: 16px;
+            height: 16px;
             margin: 0;
             padding: 0;
             cursor: pointer;
             accent-color: #0f172a;
-            flex-shrink: 0;
-            border-radius: 3px;
-            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            border: 1.5px solid #cbd5e1;
             background: #fff;
             transition: 0.1s;
             appearance: auto;
             -webkit-appearance: auto;
+            flex-shrink: 0;
         }
 
-        .msg-select:hover {
+        .msg-checkbox-wrap .msg-select:hover {
             border-color: #94a3b8;
             transform: scale(1.05);
         }
-
-        .msg-select:checked {
+        .msg-checkbox-wrap .msg-select:checked {
             accent-color: #0f172a;
             border-color: #0f172a;
         }
 
+        .msg-wrapper.sent .msg-checkbox-wrap {
+            order: 1;
+            margin-left: 6px;
+        }
+        .msg-wrapper.received .msg-checkbox-wrap {
+            order: 0;
+            margin-right: 6px;
+        }
+
+        /* ── Selected state ── */
+        .msg-wrapper.selected .bubble {
+            outline: 2px solid #94a3b8;
+            outline-offset: 1px;
+        }
+
+        .msg-wrapper.selected .bubble::after {
+            content: '✓';
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            font-size: 0.5rem;
+            background: #0f172a;
+            color: #fff;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .msg-wrapper.received.selected .bubble::after {
+            right: -6px;
+            left: auto;
+        }
+
+        /* ── Empty state ── */
         .empty-state {
             text-align: center;
-            padding: 2rem 1.5rem;
-            background: #ffffff;
+            padding: 2.5rem 1.5rem;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(4px);
             border-radius: 20px;
-            color: #94a3b8;
+            color: #6b7280;
             font-size: 0.8rem;
-            border: 1px solid #eef2f6;
-            margin: 0.2rem 0;
-            line-height: 1.6;
-            transition: background 0.2s, color 0.2s, border-color 0.2s;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            margin: auto;
+            line-height: 1.8;
+            max-width: 400px;
+            transition: background 0.3s, color 0.3s, border-color 0.3s;
         }
 
         .empty-state code {
-            background: #f1f5f9;
+            background: rgba(0, 0, 0, 0.05);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
         }
 
+        /* ── Footer ── */
         footer {
             text-align: center;
             font-size: 0.6rem;
@@ -523,10 +676,10 @@
         /* ── Responsive ── */
         @media (max-width: 640px) {
             body {
-                padding: 0.8rem;
+                padding: 0.6rem;
             }
             .control-card {
-                padding: 1rem 1.2rem;
+                padding: 1rem 1rem;
             }
             .flex-row {
                 flex-direction: column;
@@ -536,25 +689,50 @@
                 flex: 1;
                 min-width: 100%;
             }
-            .msg-text {
-                padding-right: 0;
-            }
-            .msg-select {
-                top: 10px;
-                right: 10px;
-                width: 16px;
-                height: 16px;
-            }
-            .convo-item {
-                padding-right: 38px;
-            }
             .tab-btn {
                 padding: 0.5rem 1rem;
                 font-size: 0.7rem;
             }
             .format-example {
+                font-size: 0.6rem;
+                padding: 8px 10px;
+            }
+            .results-raw {
+                border-radius: 14px;
+            }
+            .message-list {
+                padding: 12px 12px 16px 12px;
+            }
+            .bubble-container {
+                max-width: 85%;
+            }
+            .msg-wrapper.sent {
+                padding-left: 20px;
+            }
+            .msg-wrapper.received {
+                padding-right: 20px;
+            }
+            .msg-text {
+                font-size: 0.9rem;
+            }
+            .msg-speaker-name {
                 font-size: 0.65rem;
-                padding: 8px 12px;
+            }
+            .msg-timestamp-inline {
+                font-size: 0.55rem;
+            }
+            .results-header {
+                padding: 10px 14px;
+            }
+            .msg-wrapper.sent .msg-checkbox-wrap {
+                margin-left: 4px;
+            }
+            .msg-wrapper.received .msg-checkbox-wrap {
+                margin-right: 4px;
+            }
+            .msg-checkbox-wrap .msg-select {
+                width: 15px;
+                height: 15px;
             }
         }
 
@@ -569,6 +747,21 @@
             h1 {
                 font-size: 1rem;
             }
+            .bubble-container {
+                max-width: 92%;
+            }
+            .msg-wrapper.sent {
+                padding-left: 6px;
+            }
+            .msg-wrapper.received {
+                padding-right: 6px;
+            }
+            .message-list {
+                padding: 8px 8px 12px 8px;
+            }
+            .msg-text {
+                font-size: 0.85rem;
+            }
         }
 
         /* ── DARK MODE ── */
@@ -581,7 +774,6 @@
             .tab-bar {
                 border-bottom-color: #2d3a5e;
             }
-
             .tab-btn {
                 color: #94a3b8;
             }
@@ -603,12 +795,10 @@
             h1 {
                 color: #f1f5f9;
             }
-
             .sub {
                 color: #94a3b8;
                 border-left-color: #3b82f6;
             }
-
             .stats-badge {
                 background: #0f172a;
                 color: #a5f3fc;
@@ -626,7 +816,6 @@
                 background: #2d3a5e;
                 border-color: #5b6e8c;
             }
-
             button.secondary {
                 background: #0f172a;
                 border-color: #475569;
@@ -637,11 +826,9 @@
                 border-color: #5b6e8c;
                 color: #e2e8f0;
             }
-
             #fileName {
                 color: #cbd5e1;
             }
-
             .restore-badge {
                 background: #1e293b;
                 border-color: #3b82f6;
@@ -661,11 +848,9 @@
             input::placeholder {
                 color: #64748b;
             }
-
             label {
                 color: #9ca3af;
             }
-
             .field-group:last-child button {
                 background: #facc15;
                 border-color: #facc15;
@@ -695,12 +880,31 @@
                 color: #34d399;
             }
 
-            .result-count-badge {
-                background: #0f172a;
-                color: #a5f3fc;
-                border: 1px solid #2d3a5e;
+            /* ── Dark: Results ── */
+            .results-raw {
+                background: #0f1923;
+            }
+            .results-raw::before {
+                opacity: 0.08;
+                background-image:
+                    radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.02) 0%, transparent 60%),
+                    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.02) 0%, transparent 50%),
+                    repeating-linear-gradient(45deg,
+                        transparent,
+                        transparent 20px,
+                        rgba(255, 255, 255, 0.005) 20px,
+                        rgba(255, 255, 255, 0.005) 21px);
             }
 
+            .results-header {
+                background: rgba(15, 25, 35, 0.85);
+                backdrop-filter: blur(8px);
+                border-bottom-color: rgba(255, 255, 255, 0.06);
+            }
+            .result-count-badge {
+                background: rgba(255, 255, 255, 0.08);
+                color: #cbd5e1;
+            }
             .delete-selected-btn {
                 background: #4c1d2b;
                 border-color: #7f1d3a;
@@ -712,68 +916,81 @@
                 color: #fff;
             }
 
-            .convo-item {
-                background: #0f172a;
-                border-color: #2d3a5e;
-            }
-            .convo-item:hover {
-                background: #1e2a3a;
-                border-color: #5b6e8c;
-            }
-            .convo-item.selected {
-                border-color: #60a5fa;
-                background: #1a2744;
-                box-shadow: 0 0 0 1px #60a5fa44;
+            .date-divider span {
+                background: rgba(30, 41, 59, 0.8);
+                color: #9ca3af;
             }
 
-            .msg-datetime {
-                background: #111827;
-                color: #7dd3fc;
-            }
-
-            /* dark speaker labels – text only */
-            .msg-speaker.speaker1-label {
-                background: transparent;
-                color: #fbbf24;
-            }
-            .msg-speaker.speaker2-label {
-                background: transparent;
-                color: #34d399;
-            }
-
-            .msg-text {
+            .msg-wrapper.sent .bubble {
+                background: #075e54;
                 color: #e2e8f0;
             }
 
+            .msg-wrapper.received .bubble {
+                background: #1e293b;
+                color: #e2e8f0;
+                border-color: rgba(255, 255, 255, 0.05);
+            }
+
+            .msg-speaker-name {
+                color: #9ca3af;
+            }
+            .msg-wrapper.sent .msg-speaker-name {
+                color: #8ca3c0;
+            }
+            /* Dark mode speaker colors — keep them bright */
+            .msg-speaker-name .highlight-s1 {
+                color: #facc15;
+                background: transparent;
+            }
+            .msg-speaker-name .highlight-s2 {
+                color: #34d399;
+                background: transparent;
+            }
+
+            .msg-timestamp-inline {
+                color: #ffffff;
+                text-shadow: 0 0 4px rgba(0, 0, 0, 0.7);
+            }
+
+            /* UPDATED: No yellow background, yellow text in Dark Mode as well */
             .msg-text mark {
-                background: #fef3c7;
-                color: #92400e;
+                background: transparent;
+                color: #facc15;
             }
             .msg-text mark.speaker2 {
                 background: #065f46;
                 color: #a7f3d0;
             }
 
-            .msg-select {
+            .msg-checkbox-wrap .msg-select {
                 border-color: #5b6e8c;
                 background: #0f172a;
             }
-            .msg-select:hover {
+            .msg-checkbox-wrap .msg-select:hover {
                 border-color: #93c5fd;
             }
-            .msg-select:checked {
+            .msg-checkbox-wrap .msg-select:checked {
                 accent-color: #60a5fa;
                 border-color: #60a5fa;
             }
 
+            .msg-wrapper.selected .bubble {
+                outline-color: #60a5fa;
+            }
+            .msg-wrapper.selected .bubble::after {
+                background: #60a5fa;
+                color: #0f172a;
+            }
+
             .empty-state {
-                background: #0f172a;
-                color: #94a3b8;
-                border-color: #2d3a5e;
+                background: rgba(15, 25, 35, 0.7);
+                color: #9ca3af;
+                border-color: rgba(255, 255, 255, 0.05);
             }
             .empty-state code {
-                background: #1e293b;
-                color: #e2e8f0;
+                background: rgba(255, 255, 255, 0.06);
+                color: #cbd5e1;
             }
 
             footer {
@@ -839,13 +1056,13 @@
                         &nbsp;·&nbsp; <code>6/6/26, 22:16 - Speaker: text</code>
                         <br>
                         <span class="accent">↳</span> multi‑line merged &nbsp;·&nbsp; <span class="highlight">speaker 1 yellow</span>
-                        &nbsp;·&nbsp; <span class="green">speaker 2 green</span>
+                        &nbsp;·&nbsp; <span class="green">speaker 2 light green</span>
                         &nbsp;·&nbsp; <span style="color:#64748b;">💾 auto‑saved</span>
                     </div>
                 </div>
             </div>
 
-            <!-- TAB 2: RESULTS -->
+            <!-- TAB 2: RESULTS — WHATSAPP STYLE (no avatar) -->
             <div class="tab-panel" id="resultsPanel">
                 <div class="results-raw">
                     <div class="results-header">
@@ -859,7 +1076,7 @@
             </div>
         </div>
 
-        <footer id="mainFooter">dual format · continuation lines · speaker 1 <span style="color:#b45309;font-weight:600;">yellow</span> · speaker 2 <span style="color:#065f46;font-weight:600;">green</span> · select &amp; delete · auto‑persist</footer>
+        <footer id="mainFooter">dual format · continuation lines · speaker 1 <span style="color:#facc15;font-weight:600;">yellow</span> · speaker 2 <span style="color:#34d399;font-weight:600;">light green</span> · select &amp; delete · auto‑persist</footer>
     </div>
 
     <script>
@@ -958,7 +1175,6 @@
             if (speaker1 && speaker1.length) entries.push({ name: speaker1, cls: '' });
             if (speaker2 && speaker2.length) entries.push({ name: speaker2, cls: 'speaker2' });
 
-            // If same name appears in both, keep only speaker1 (yellow)
             const seen = new Set();
             const unique = [];
             for (const e of entries) {
@@ -966,7 +1182,6 @@
                 if (!seen.has(key)) { seen.add(key);
                     unique.push(e); }
             }
-            // Sort by length descending so longer names (substrings) are handled first
             unique.sort((a, b) => b.name.length - a.name.length);
 
             for (const { name, cls } of unique) {
@@ -1141,7 +1356,7 @@
             if (resultsContainer) {
                 if (fileLoaded && parsedMessages.length > 0) {
                     resultsContainer.innerHTML =
-                        `<div class="empty-state">file loaded · enter speaker + date → search<br><span style="color:#94a3b8;">results appear here with bold highlights &amp; checkboxes</span></div>`;
+                        `<div class="empty-state">file loaded · enter speaker + date → search<br><span style="color:#94a3b8;">results appear as chat bubbles · select with checkboxes</span></div>`;
                 } else if (fileLoaded && parsedMessages.length === 0) {
                     resultsContainer.innerHTML =
                         `<div class="empty-state">no valid messages in file<br><span style="color:#94a3b8;">check format: <code>[dd/mm/yyyy, HH:MM:SS] Speaker: text</code></span></div>`;
@@ -1169,7 +1384,31 @@
             }
         }
 
-        // ── RENDER ──
+        // ── DATE DIVIDER HELPERS ──
+        function formatDateDivider(ts) {
+            const d = new Date(ts);
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+
+            const dDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
+            if (dDate.getTime() === today.getTime()) return 'Today';
+            if (dDate.getTime() === yesterday.getTime()) return 'Yesterday';
+
+            const dd = String(d.getDate()).padStart(2, '0');
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const yyyy = d.getFullYear();
+            return `${dd}/${mm}/${yyyy}`;
+        }
+
+        function getDateKey(ts) {
+            const d = new Date(ts);
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        }
+
+        // ── RENDER — WHATSAPP STYLE (no avatar, timestamp next to name, no "you") ──
         function renderResults(messages, speaker1, speaker2) {
             if (!messages.length) {
                 if (fileLoaded && parsedMessages.length) {
@@ -1191,53 +1430,166 @@
             const frag = document.createDocumentFragment();
             updateResultCount(messages.length);
 
-            for (let i = 0; i < messages.length; i++) {
-                const msg = messages[i];
-                const div = document.createElement('div');
-                div.className = 'convo-item';
-
-                const meta = document.createElement('div');
-                meta.className = 'msg-meta';
-                const dt = document.createElement('span');
-                dt.className = 'msg-datetime';
-                dt.textContent = `${msg.displayDate || msg.rawDate} ${msg.displayTime || msg.rawTime}`;
-                const sp = document.createElement('span');
-                sp.className = 'msg-speaker';
-                sp.textContent = msg.speaker;
-                // Apply speaker label colors (text only)
-                if (speaker1 && msg.speaker.toLowerCase() === speaker1.toLowerCase()) {
-                    sp.classList.add('speaker1-label');
-                } else if (speaker2 && msg.speaker.toLowerCase() === speaker2.toLowerCase()) {
-                    sp.classList.add('speaker2-label');
-                }
-                meta.appendChild(dt);
-                meta.appendChild(sp);
-
-                const txt = document.createElement('div');
-                txt.className = 'msg-text';
-                txt.innerHTML = highlightText(msg.message, speaker1, speaker2);
-
-                const cb = document.createElement('input');
-                cb.type = 'checkbox';
-                cb.className = 'msg-select';
-                cb.dataset.idx = i;
-                cb.checked = false;
-                cb.addEventListener('change', (e) => {
-                    if (e.target.checked) { selectedMessages.add(msg);
-                        div.classList.add('selected'); } else { selectedMessages.delete(msg);
-                        div.classList.remove('selected'); }
-                    updateDeleteButtonVisibility();
-                    saveState();
-                });
-
-                div.appendChild(meta);
-                div.appendChild(txt);
-                div.appendChild(cb);
-                frag.appendChild(div);
+            // Group by date
+            const groups = {};
+            for (const msg of messages) {
+                const key = getDateKey(msg.dayTimestamp);
+                if (!groups[key]) groups[key] = [];
+                groups[key].push(msg);
             }
+
+            const sortedKeys = Object.keys(groups).sort((a, b) => a.localeCompare(b));
+
+            const s1 = speaker1 || '';
+            const s2 = speaker2 || '';
+
+            for (const key of sortedKeys) {
+                const dayMs = new Date(key + 'T00:00:00Z').getTime();
+                const label = formatDateDivider(dayMs);
+
+                // Date divider
+                const div = document.createElement('div');
+                div.className = 'date-divider';
+                const span = document.createElement('span');
+                span.textContent = label;
+                div.appendChild(span);
+                frag.appendChild(div);
+
+                const msgs = groups[key];
+                msgs.sort((a, b) => a.fullTimestamp - b.fullTimestamp);
+
+                for (let i = 0; i < msgs.length; i++) {
+                    const msg = msgs[i];
+                    const isSpeaker1 = s1 && msg.speakerLower === s1.toLowerCase();
+                    const isSpeaker2 = s2 && msg.speakerLower === s2.toLowerCase();
+
+                    let isSent = false;
+                    if (s1 && s2) {
+                        isSent = isSpeaker1;
+                    } else if (s1 && !s2) {
+                        isSent = isSpeaker1;
+                    } else {
+                        isSent = false;
+                    }
+                    if (s1 && s2 && isSpeaker2) isSent = false;
+                    if (s1 && !s2) isSent = true;
+
+                    const wrapper = document.createElement('div');
+                    wrapper.className = `msg-wrapper ${isSent ? 'sent' : 'received'}`;
+
+                    // ── Checkbox ──
+                    const cbWrap = document.createElement('div');
+                    cbWrap.className = 'msg-checkbox-wrap';
+                    const cb = document.createElement('input');
+                    cb.type = 'checkbox';
+                    cb.className = 'msg-select';
+                    cb.dataset.idx = i;
+                    cb.checked = false;
+                    cb.addEventListener('change', (e) => {
+                        if (e.target.checked) { selectedMessages.add(msg);
+                            wrapper.classList.add('selected'); } else { selectedMessages.delete(msg);
+                            wrapper.classList.remove('selected'); }
+                        updateDeleteButtonVisibility();
+                        saveState();
+                    });
+                    cbWrap.appendChild(cb);
+
+                    // ── Bubble container ──
+                    const bubbleContainer = document.createElement('div');
+                    bubbleContainer.className = 'bubble-container';
+
+                    // ── Speaker name + timestamp inline (no "you") ──
+                    const nameEl = document.createElement('div');
+                    nameEl.className = 'msg-speaker-name';
+
+                    // Format time for inline display: HH:MM
+                    const timeParts = msg.rawTime ? msg.rawTime.split(':') : ['00', '00'];
+                    let hh = timeParts[0] || '00',
+                        mm = timeParts[1] || '00';
+                    if (hh.length === 1) hh = '0' + hh;
+                    if (mm.length === 1) mm = '0' + mm;
+                    const timeStr = `${hh}:${mm}`;
+
+                    if (isSent) {
+                        const displayName = s1 || msg.speaker;
+                        nameEl.innerHTML = `
+                            <span class="highlight-s1">${escapeHtml(displayName)}</span>
+                            <span class="msg-timestamp-inline">${timeStr}</span>
+                        `;
+                    } else {
+                        const displayName = msg.speaker;
+                        nameEl.innerHTML = `
+                            <span class="highlight-s2">${escapeHtml(displayName)}</span>
+                            <span class="msg-timestamp-inline">${timeStr}</span>
+                        `;
+                    }
+                    bubbleContainer.appendChild(nameEl);
+
+                    // ── Bubble ──
+                    const bubble = document.createElement('div');
+                    bubble.className = 'bubble';
+
+                    const txt = document.createElement('div');
+                    txt.className = 'msg-text';
+                    txt.innerHTML = highlightText(msg.message, s1, s2);
+                    bubble.appendChild(txt);
+
+                    bubbleContainer.appendChild(bubble);
+
+                    // ── Assemble ──
+                    if (!isSent) {
+                        wrapper.appendChild(cbWrap);
+                        wrapper.appendChild(bubbleContainer);
+                    } else {
+                        wrapper.appendChild(bubbleContainer);
+                        wrapper.appendChild(cbWrap);
+                    }
+
+                    // Restore selection state
+                    const saved = loadState();
+                    if (saved && saved.selectedIds && saved.selectedIds.includes(getMessageId(msg))) {
+                        cb.checked = true;
+                        wrapper.classList.add('selected');
+                        selectedMessages.add(msg);
+                    }
+
+                    frag.appendChild(wrapper);
+                }
+            }
+
             resultsContainer.innerHTML = '';
             resultsContainer.appendChild(frag);
             updateDeleteButtonVisibility();
+
+            // Re-sync selected count after restore
+            const savedState = loadState();
+            if (savedState && savedState.selectedIds && savedState.selectedIds.length) {
+                const ids = new Set(savedState.selectedIds);
+                const items = resultsContainer.querySelectorAll('.msg-wrapper');
+                let count = 0;
+                let idx = 0;
+                for (const key of sortedKeys) {
+                    const msgs = groups[key];
+                    for (const msg of msgs) {
+                        const item = items[idx];
+                        if (item && ids.has(getMessageId(msg))) {
+                            const cb = item.querySelector('.msg-select');
+                            if (cb) cb.checked = true;
+                            item.classList.add('selected');
+                            selectedMessages.add(msg);
+                            count++;
+                        }
+                        idx++;
+                    }
+                }
+                updateDeleteButtonVisibility();
+            }
+        }
+
+        function escapeHtml(s) {
+            const d = document.createElement('div');
+            d.textContent = s;
+            return d.innerHTML;
         }
 
         // ── SEARCH ──
@@ -1272,7 +1624,7 @@
             const n1l = n1.toLowerCase(),
                 n2l = n2.toLowerCase();
             let filtered = parsedMessages.filter(m => n2 ? m.speakerLower === n1l || m.speakerLower === n2l : m
-            .speakerLower === n1l);
+                .speakerLower === n1l);
 
             if (fromMs !== null || toMs !== null) {
                 filtered = filtered.filter(m => {
@@ -1285,7 +1637,6 @@
 
             filtered.sort((a, b) => a.fullTimestamp - b.fullTimestamp);
 
-            // Store speaker names for highlighting
             const s1 = n1 || null;
             const s2 = n2 || null;
 
@@ -1295,22 +1646,6 @@
             selectedMessages.clear();
 
             renderResults(currentDisplayedMessages, currentSpeaker1, currentSpeaker2);
-
-            const saved = loadState();
-            if (saved && saved.selectedIds && saved.selectedIds.length) {
-                const ids = new Set(saved.selectedIds);
-                const els = resultsContainer.querySelectorAll('.convo-item');
-                for (let i = 0; i < currentDisplayedMessages.length; i++) {
-                    const m = currentDisplayedMessages[i];
-                    if (ids.has(getMessageId(m))) {
-                        selectedMessages.add(m);
-                        const el = els[i];
-                        if (el) { const cb = el.querySelector('.msg-select'); if (cb) cb.checked = true;
-                            el.classList.add('selected'); }
-                    }
-                }
-                updateDeleteButtonVisibility();
-            }
 
             switchTab('results', false);
             if (save) saveState();
@@ -1482,7 +1817,7 @@
         else mainFooter?.classList.remove('hide-footer');
 
         window.addEventListener('beforeunload', () => saveState());
-        console.log('⌕ log search ready');
+        console.log('⌕ log search ready · WhatsApp UI (no avatar, timestamp next to name, no "you")');
     </script>
 </body>
 </html>
