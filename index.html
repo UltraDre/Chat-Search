@@ -106,6 +106,7 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.02);
             border: 1px solid #eef2f6;
             transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+            position: relative;
         }
 
         .flex-between {
@@ -207,6 +208,11 @@
         }
 
         /* ── Inputs ── */
+        .input-wrap {
+            position: relative;
+            width: 100%;
+        }
+
         input {
             background: #f8fafc;
             border: 1px solid #e2e8f0;
@@ -273,6 +279,75 @@
             transform: translateY(-1px);
         }
 
+        /* ── Suggestions dropdown ── */
+        .suggestions-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            width: 100%;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+            max-height: 180px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            padding: 4px 0;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .suggestions-dropdown .suggestion-item {
+            padding: 6px 16px;
+            font-size: 0.8rem;
+            color: #0f172a;
+            cursor: pointer;
+            transition: background 0.1s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .suggestions-dropdown .suggestion-item:hover,
+        .suggestions-dropdown .suggestion-item.active {
+            background: #f1f5f9;
+        }
+
+        .suggestions-dropdown .suggestion-item .highlight {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .suggestions-dropdown .no-suggestions {
+            padding: 10px 16px;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-align: center;
+        }
+
+        /* Dark mode suggestions */
+        @media (prefers-color-scheme: dark) {
+            .suggestions-dropdown {
+                background: #1e293b;
+                border-color: #2d3a5e;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            }
+            .suggestions-dropdown .suggestion-item {
+                color: #e2e8f0;
+            }
+            .suggestions-dropdown .suggestion-item:hover,
+            .suggestions-dropdown .suggestion-item.active {
+                background: #0f172a;
+            }
+            .suggestions-dropdown .suggestion-item .highlight {
+                color: #facc15;
+            }
+            .suggestions-dropdown .no-suggestions {
+                color: #64748b;
+            }
+        }
+
+        /* ── Format example ── */
         .format-example {
             background: #f8fafc;
             border-radius: 14px;
@@ -490,19 +565,17 @@
             color: #4b5563;
         }
 
-        /* Speaker text colors — no background */
         .msg-speaker-name .highlight-s1 {
-            color: #facc15;  /* bright yellow */
+            color: #facc15;
             background: transparent;
             font-weight: 600;
         }
         .msg-speaker-name .highlight-s2 {
-            color: #00ff00;  /* VERY bright green */
+            color: #00ff00;
             background: transparent;
             font-weight: 600;
         }
 
-        /* Timestamp inside name line — white with shadow */
         .msg-timestamp-inline {
             color: #ffffff;
             text-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
@@ -544,7 +617,6 @@
             word-break: break-word;
         }
 
-        /* Speaker 1: Yellow text */
         .msg-text mark {
             background: transparent;
             color: #facc15;
@@ -554,13 +626,11 @@
             transition: color 0.2s;
         }
 
-        /* Speaker 2: VERY bright green text */
         .msg-text mark.speaker2 {
             background: #d1fae5;
             color: #00ff00;
         }
 
-        /* Keyword highlight: Blue */
         .msg-text mark.keyword {
             background: transparent;
             color: #2563eb;
@@ -569,7 +639,6 @@
             border-radius: 0px;
         }
 
-        /* ── No separate timestamp inside bubble ── */
         .msg-timestamp {
             display: none;
         }
@@ -743,6 +812,13 @@
             .msg-checkbox-wrap .msg-select {
                 width: 15px;
                 height: 15px;
+            }
+            .suggestions-dropdown {
+                max-height: 140px;
+            }
+            .suggestions-dropdown .suggestion-item {
+                padding: 5px 14px;
+                font-size: 0.75rem;
             }
         }
 
@@ -948,13 +1024,12 @@
             .msg-wrapper.sent .msg-speaker-name {
                 color: #8ca3c0;
             }
-            /* Dark mode speaker colors */
             .msg-speaker-name .highlight-s1 {
                 color: #facc15;
                 background: transparent;
             }
             .msg-speaker-name .highlight-s2 {
-                color: #00ff00; /* VERY bright green in dark mode */
+                color: #00ff00;
                 background: transparent;
             }
 
@@ -963,14 +1038,13 @@
                 text-shadow: 0 0 4px rgba(0, 0, 0, 0.7);
             }
 
-            /* Dark mode speaker highlighting */
             .msg-text mark {
                 background: transparent;
                 color: #facc15;
             }
             .msg-text mark.speaker2 {
                 background: #065f46;
-                color: #00ff00; /* VERY bright green in dark mode */
+                color: #00ff00;
             }
 
             .msg-text mark.keyword {
@@ -1012,6 +1086,25 @@
                 color: #5b6e8c;
                 border-top-color: #1e293b;
             }
+
+            /* Dark: suggestions */
+            .suggestions-dropdown {
+                background: #1e293b;
+                border-color: #2d3a5e;
+            }
+            .suggestions-dropdown .suggestion-item {
+                color: #e2e8f0;
+            }
+            .suggestions-dropdown .suggestion-item:hover,
+            .suggestions-dropdown .suggestion-item.active {
+                background: #0f172a;
+            }
+            .suggestions-dropdown .suggestion-item .highlight {
+                color: #facc15;
+            }
+            .suggestions-dropdown .no-suggestions {
+                color: #64748b;
+            }
         }
     </style>
 </head>
@@ -1045,11 +1138,17 @@
                     <div class="flex-row">
                         <div class="field-group">
                             <label>speaker 1 *</label>
-                            <input type="text" id="name1" placeholder="e.g. Samuel" autocomplete="off">
+                            <div class="input-wrap">
+                                <input type="text" id="name1" placeholder="e.g. Samuel" autocomplete="off">
+                                <div class="suggestions-dropdown" id="suggestions1"></div>
+                            </div>
                         </div>
                         <div class="field-group">
                             <label>speaker 2</label>
-                            <input type="text" id="name2" placeholder="optional" autocomplete="off">
+                            <div class="input-wrap">
+                                <input type="text" id="name2" placeholder="optional" autocomplete="off">
+                                <div class="suggestions-dropdown" id="suggestions2"></div>
+                            </div>
                         </div>
                         <div class="field-group">
                             <label>from</label>
@@ -1129,6 +1228,169 @@
         const resultCountBadge = document.getElementById('resultCountBadge');
         const restoreIndicator = document.getElementById('restoreIndicator');
 
+        // Suggestions
+        const suggestions1 = document.getElementById('suggestions1');
+        const suggestions2 = document.getElementById('suggestions2');
+        const SUGGESTIONS_KEY = 'speaker_suggestions';
+        let speakerSuggestions = new Set();
+
+        // ── SUGGESTIONS ──
+        function loadSuggestions() {
+            try {
+                const data = localStorage.getItem(SUGGESTIONS_KEY);
+                if (data) {
+                    const arr = JSON.parse(data);
+                    arr.forEach(name => speakerSuggestions.add(name));
+                }
+            } catch (_) {}
+        }
+
+        function saveSuggestions() {
+            try {
+                localStorage.setItem(SUGGESTIONS_KEY, JSON.stringify([...speakerSuggestions]));
+            } catch (_) {}
+        }
+
+        function addSpeakerSuggestion(name) {
+            if (name && name.trim()) {
+                speakerSuggestions.add(name.trim());
+                saveSuggestions();
+            }
+        }
+
+        function getMatchingSuggestions(input) {
+            const val = input.trim().toLowerCase();
+            if (!val) return [];
+            const matches = [...speakerSuggestions].filter(name =>
+                name.toLowerCase().startsWith(val)
+            );
+            matches.sort((a, b) => a.localeCompare(b));
+            return matches;
+        }
+
+        function renderSuggestions(inputEl, dropdownEl) {
+            const val = inputEl.value;
+            const matches = getMatchingSuggestions(val);
+            if (!matches.length || !val.trim()) {
+                dropdownEl.style.display = 'none';
+                return;
+            }
+            dropdownEl.innerHTML = '';
+            matches.forEach(name => {
+                const div = document.createElement('div');
+                div.className = 'suggestion-item';
+                const lowerVal = val.trim().toLowerCase();
+                const idx = name.toLowerCase().indexOf(lowerVal);
+                if (idx !== -1) {
+                    const before = name.slice(0, idx);
+                    const match = name.slice(idx, idx + val.trim().length);
+                    const after = name.slice(idx + val.trim().length);
+                    div.innerHTML = `${before}<span class="highlight">${match}</span>${after}`;
+                } else {
+                    div.textContent = name;
+                }
+                div.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    inputEl.value = name;
+                    dropdownEl.style.display = 'none';
+                    inputEl.focus();
+                    // Save this name and trigger search
+                    addSpeakerSuggestion(name);
+                    // Dispatch input event so any listeners know
+                    inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+                });
+                dropdownEl.appendChild(div);
+            });
+            dropdownEl.style.display = 'block';
+        }
+
+        function hideSuggestions(dropdownEl) {
+            setTimeout(() => {
+                dropdownEl.style.display = 'none';
+            }, 120);
+        }
+
+        function setupSuggestions(inputEl, dropdownEl) {
+            // On input: show suggestions
+            inputEl.addEventListener('input', () => {
+                renderSuggestions(inputEl, dropdownEl);
+            });
+
+            // On focus: show suggestions if there's a value
+            inputEl.addEventListener('focus', () => {
+                if (inputEl.value.trim()) {
+                    renderSuggestions(inputEl, dropdownEl);
+                }
+            });
+
+            // On blur: hide with delay
+            inputEl.addEventListener('blur', () => {
+                hideSuggestions(dropdownEl);
+            });
+
+            // Keyboard: up/down/enter
+            inputEl.addEventListener('keydown', (e) => {
+                const items = dropdownEl.querySelectorAll('.suggestion-item');
+                if (!items.length) return;
+
+                let activeIdx = -1;
+                items.forEach((el, i) => {
+                    if (el.classList.contains('active')) {
+                        activeIdx = i;
+                        el.classList.remove('active');
+                    }
+                });
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const nextIdx = (activeIdx + 1) % items.length;
+                    items[nextIdx].classList.add('active');
+                    items[nextIdx].scrollIntoView({ block: 'nearest' });
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    const prevIdx = (activeIdx - 1 + items.length) % items.length;
+                    items[prevIdx].classList.add('active');
+                    items[prevIdx].scrollIntoView({ block: 'nearest' });
+                } else if (e.key === 'Enter' || e.key === 'Tab') {
+                    if (activeIdx !== -1) {
+                        e.preventDefault();
+                        const name = items[activeIdx].textContent;
+                        inputEl.value = name;
+                        dropdownEl.style.display = 'none';
+                        addSpeakerSuggestion(name);
+                        inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+                        // If it's Tab, let it move to next field naturally after filling
+                        if (e.key === 'Tab') {
+                            setTimeout(() => {
+                                const form = inputEl.form || inputEl.closest('form');
+                                if (form) {
+                                    const inputs = [...form.querySelectorAll('input, button, select, textarea')];
+                                    const idx = inputs.indexOf(inputEl);
+                                    if (idx !== -1 && idx < inputs.length - 1) {
+                                        inputs[idx + 1].focus();
+                                    }
+                                }
+                            }, 10);
+                        }
+                    }
+                }
+            });
+
+            // Close on escape
+            inputEl.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    dropdownEl.style.display = 'none';
+                }
+            });
+
+            // Click outside closes dropdown
+            document.addEventListener('click', (e) => {
+                if (!inputEl.contains(e.target) && !dropdownEl.contains(e.target)) {
+                    dropdownEl.style.display = 'none';
+                }
+            });
+        }
+
         // ── PERSISTENCE ──
         const STORAGE_KEY = 'edge_searcher_state';
 
@@ -1194,13 +1456,11 @@
         function highlightText(text, speaker1, speaker2, keyword) {
             let out = text.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
 
-            // 1. Apply Keyword highlight FIRST (will be wrapped by speaker if they overlap, keeping speaker color priority)
             if (keyword && keyword.length) {
                 const re = new RegExp(`(${escapeRegex(keyword)})`, 'gi');
                 out = out.replace(re, `<mark class="keyword">$1</mark>`);
             }
 
-            // 2. Apply Speaker highlight
             const entries = [];
             if (speaker1 && speaker1.length) entries.push({ name: speaker1, cls: '' });
             if (speaker2 && speaker2.length) entries.push({ name: speaker2, cls: 'speaker2' });
@@ -1461,7 +1721,6 @@
             const frag = document.createDocumentFragment();
             updateResultCount(messages.length);
 
-            // Group by date
             const groups = {};
             for (const msg of messages) {
                 const key = getDateKey(msg.dayTimestamp);
@@ -1479,7 +1738,6 @@
                 const dayMs = new Date(key + 'T00:00:00Z').getTime();
                 const label = formatDateDivider(dayMs);
 
-                // Date divider
                 const div = document.createElement('div');
                 div.className = 'date-divider';
                 const span = document.createElement('span');
@@ -1509,7 +1767,6 @@
                     const wrapper = document.createElement('div');
                     wrapper.className = `msg-wrapper ${isSent ? 'sent' : 'received'}`;
 
-                    // ── Checkbox ──
                     const cbWrap = document.createElement('div');
                     cbWrap.className = 'msg-checkbox-wrap';
                     const cb = document.createElement('input');
@@ -1526,15 +1783,12 @@
                     });
                     cbWrap.appendChild(cb);
 
-                    // ── Bubble container ──
                     const bubbleContainer = document.createElement('div');
                     bubbleContainer.className = 'bubble-container';
 
-                    // ── Speaker name + timestamp inline (no "you") ──
                     const nameEl = document.createElement('div');
                     nameEl.className = 'msg-speaker-name';
 
-                    // Format time for inline display: HH:MM
                     const timeParts = msg.rawTime ? msg.rawTime.split(':') : ['00', '00'];
                     let hh = timeParts[0] || '00',
                         mm = timeParts[1] || '00';
@@ -1557,7 +1811,6 @@
                     }
                     bubbleContainer.appendChild(nameEl);
 
-                    // ── Bubble ──
                     const bubble = document.createElement('div');
                     bubble.className = 'bubble';
 
@@ -1568,7 +1821,6 @@
 
                     bubbleContainer.appendChild(bubble);
 
-                    // ── Assemble ──
                     if (!isSent) {
                         wrapper.appendChild(cbWrap);
                         wrapper.appendChild(bubbleContainer);
@@ -1577,7 +1829,6 @@
                         wrapper.appendChild(cbWrap);
                     }
 
-                    // Restore selection state
                     const saved = loadState();
                     if (saved && saved.selectedIds && saved.selectedIds.includes(getMessageId(msg))) {
                         cb.checked = true;
@@ -1593,7 +1844,6 @@
             resultsContainer.appendChild(frag);
             updateDeleteButtonVisibility();
 
-            // Re-sync selected count after restore
             const savedState = loadState();
             if (savedState && savedState.selectedIds && savedState.selectedIds.length) {
                 const ids = new Set(savedState.selectedIds);
@@ -1637,7 +1887,10 @@
             const n2 = name2Input.value.trim();
             const keyword = searchTextInput.value.trim();
 
-            // Updated Validation: require either a speaker OR a keyword
+            // Save any speaker names typed to suggestions
+            if (n1) addSpeakerSuggestion(n1);
+            if (n2) addSpeakerSuggestion(n2);
+
             if (!n1 && !keyword) {
                 resultsContainer.innerHTML = `<div class="empty-state">enter speaker 1 or a keyword to search all chats</div>`;
                 switchTab('results', false);
@@ -1656,10 +1909,8 @@
             if (fromMs !== null && toMs !== null && fromMs > toMs) { resultsContainer.innerHTML =
                     `<div class="empty-state">from date cannot be after to date</div>`; switchTab('results', false); return; }
 
-            // Start with all messages
             let filtered = parsedMessages;
 
-            // Apply speaker filter ONLY if a speaker is provided
             if (n1) {
                 const n1l = n1.toLowerCase();
                 const n2l = n2.toLowerCase();
@@ -1667,13 +1918,11 @@
                     .speakerLower === n1l);
             }
 
-            // Apply keyword filter (searches across all speakers)
             if (keyword) {
                 const kwl = keyword.toLowerCase();
                 filtered = filtered.filter(m => m.message.toLowerCase().includes(kwl));
             }
 
-            // Apply date filter
             if (fromMs !== null || toMs !== null) {
                 filtered = filtered.filter(m => {
                     const d = m.dayTimestamp;
@@ -1778,6 +2027,9 @@
             restoreIndicator.style.display = 'none';
             clearSavedState();
             switchTab('search', false);
+            // Hide any open suggestions
+            suggestions1.style.display = 'none';
+            suggestions2.style.display = 'none';
         }
 
         // ── DELETE ──
@@ -1803,6 +2055,10 @@
                 if (saved.startDate !== undefined) startDateInput.value = saved.startDate || '';
                 if (saved.endDate !== undefined) endDateInput.value = saved.endDate || '';
                 if (saved.searchText !== undefined) searchTextInput.value = saved.searchText || '';
+
+                // Restore suggestions from saved names
+                if (saved.name1) addSpeakerSuggestion(saved.name1);
+                if (saved.name2) addSpeakerSuggestion(saved.name2);
 
                 if (saved.fileContent && saved.fileName) {
                     const { messages } = parseFileWithContinuations(saved.fileContent);
@@ -1839,7 +2095,8 @@
                 if (active === 'results') mainFooter?.classList.add('hide-footer');
                 else mainFooter?.classList.remove('hide-footer');
 
-                if (!restored && !saved.name1 && !saved.name2 && !saved.startDate && !saved.endDate && !saved.searchText) restored = false;
+                if (!restored && !saved.name1 && !saved.name2 && !saved.startDate && !saved.endDate && !saved.searchText)
+                    restored = false;
                 else restored = true;
             } catch (_) { restored = false; } finally { restoreInProgress = false; }
             return restored;
@@ -1858,6 +2115,11 @@
                     performSearch(true); } });
         });
 
+        // ── INIT SUGGESTIONS ──
+        loadSuggestions();
+        setupSuggestions(name1Input, suggestions1);
+        setupSuggestions(name2Input, suggestions2);
+
         // ── INIT ──
         resetSearchResults();
         updateDeleteButtonVisibility();
@@ -1871,7 +2133,7 @@
         else mainFooter?.classList.remove('hide-footer');
 
         window.addEventListener('beforeunload', () => saveState());
-        console.log('⌕ log search ready · WhatsApp UI (no avatar, timestamp next to name, no "you")');
+        console.log('⌕ log search ready · WhatsApp UI (no avatar, timestamp next to name, no "you") · speaker autocomplete');
     </script>
 </body>
 </html>
