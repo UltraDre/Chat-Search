@@ -20,7 +20,7 @@
             display: flex;
             flex-direction: column;
             transition: background 0.2s, color 0.2s;
-            -webkit-text-size-adjust: 100%; /* prevent zoom on iOS */
+            -webkit-text-size-adjust: 100%;
         }
 
         .app {
@@ -219,7 +219,7 @@
             border: 1px solid #e2e8f0;
             border-radius: 40px;
             padding: 7px 14px;
-            font-size: 16px; /* critical: prevents zoom on iOS */
+            font-size: 16px;
             color: #0f172a;
             width: 100%;
             outline: none;
@@ -274,7 +274,7 @@
             padding: 7px 0;
             font-weight: 500;
             transition: background 0.2s, border-color 0.2s;
-            font-size: 16px; /* match input size for consistency */
+            font-size: 16px;
         }
         .field-group:last-child button:hover {
             background: #1e293b;
@@ -294,7 +294,7 @@
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
             max-height: 180px;
             overflow-y: auto;
-            z-index: 100;
+            z-index: 1000;
             display: none;
             padding: 4px 0;
             transition: background 0.2s, border-color 0.2s;
@@ -852,7 +852,7 @@
                 font-size: 0.85rem;
             }
             input {
-                font-size: 16px !important; /* enforce on small screens */
+                font-size: 16px !important;
             }
         }
 
@@ -1315,21 +1315,25 @@
         }
 
         function setupSuggestions(inputEl, dropdownEl) {
-            inputEl.addEventListener('input', () => {
+            // Show on input (every keystroke)
+            inputEl.addEventListener('input', function() {
                 renderSuggestions(inputEl, dropdownEl);
             });
 
-            inputEl.addEventListener('focus', () => {
-                if (inputEl.value.trim()) {
+            // Also show on focus if there is a value
+            inputEl.addEventListener('focus', function() {
+                if (this.value.trim()) {
                     renderSuggestions(inputEl, dropdownEl);
                 }
             });
 
-            inputEl.addEventListener('blur', () => {
+            // Hide on blur with a small delay to allow click on suggestion
+            inputEl.addEventListener('blur', function() {
                 hideSuggestions(dropdownEl);
             });
 
-            inputEl.addEventListener('keydown', (e) => {
+            // Keyboard navigation
+            inputEl.addEventListener('keydown', function(e) {
                 const items = dropdownEl.querySelectorAll('.suggestion-item');
                 if (!items.length) return;
 
@@ -1372,16 +1376,13 @@
                             }, 10);
                         }
                     }
-                }
-            });
-
-            inputEl.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
+                } else if (e.key === 'Escape') {
                     dropdownEl.style.display = 'none';
                 }
             });
 
-            document.addEventListener('click', (e) => {
+            // Click outside closes dropdown
+            document.addEventListener('click', function(e) {
                 if (!inputEl.contains(e.target) && !dropdownEl.contains(e.target)) {
                     dropdownEl.style.display = 'none';
                 }
@@ -2127,7 +2128,7 @@
         else mainFooter?.classList.remove('hide-footer');
 
         window.addEventListener('beforeunload', () => saveState());
-        console.log('⌕ log search ready · WhatsApp UI (no avatar, timestamp next to name, no "you") · speaker autocomplete · zoom fixed');
+        console.log('⌕ log search ready · speaker autocomplete now responds to every keystroke');
     </script>
 </body>
 </html>
