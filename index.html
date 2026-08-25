@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
     <title>log · search</title>
     <style>
         * {
@@ -20,6 +20,7 @@
             display: flex;
             flex-direction: column;
             transition: background 0.2s, color 0.2s;
+            -webkit-text-size-adjust: 100%; /* prevent zoom on iOS */
         }
 
         .app {
@@ -218,12 +219,13 @@
             border: 1px solid #e2e8f0;
             border-radius: 40px;
             padding: 7px 14px;
-            font-size: 0.8rem;
+            font-size: 16px; /* critical: prevents zoom on iOS */
             color: #0f172a;
             width: 100%;
             outline: none;
             transition: 0.15s;
             font-family: inherit;
+            -webkit-text-size-adjust: 100%;
         }
 
         input:focus {
@@ -272,6 +274,7 @@
             padding: 7px 0;
             font-weight: 500;
             transition: background 0.2s, border-color 0.2s;
+            font-size: 16px; /* match input size for consistency */
         }
         .field-group:last-child button:hover {
             background: #1e293b;
@@ -848,6 +851,9 @@
             .msg-text {
                 font-size: 0.85rem;
             }
+            input {
+                font-size: 16px !important; /* enforce on small screens */
+            }
         }
 
         /* ── DARK MODE ── */
@@ -1294,9 +1300,7 @@
                     inputEl.value = name;
                     dropdownEl.style.display = 'none';
                     inputEl.focus();
-                    // Save this name and trigger search
                     addSpeakerSuggestion(name);
-                    // Dispatch input event so any listeners know
                     inputEl.dispatchEvent(new Event('input', { bubbles: true }));
                 });
                 dropdownEl.appendChild(div);
@@ -1311,24 +1315,20 @@
         }
 
         function setupSuggestions(inputEl, dropdownEl) {
-            // On input: show suggestions
             inputEl.addEventListener('input', () => {
                 renderSuggestions(inputEl, dropdownEl);
             });
 
-            // On focus: show suggestions if there's a value
             inputEl.addEventListener('focus', () => {
                 if (inputEl.value.trim()) {
                     renderSuggestions(inputEl, dropdownEl);
                 }
             });
 
-            // On blur: hide with delay
             inputEl.addEventListener('blur', () => {
                 hideSuggestions(dropdownEl);
             });
 
-            // Keyboard: up/down/enter
             inputEl.addEventListener('keydown', (e) => {
                 const items = dropdownEl.querySelectorAll('.suggestion-item');
                 if (!items.length) return;
@@ -1359,7 +1359,6 @@
                         dropdownEl.style.display = 'none';
                         addSpeakerSuggestion(name);
                         inputEl.dispatchEvent(new Event('input', { bubbles: true }));
-                        // If it's Tab, let it move to next field naturally after filling
                         if (e.key === 'Tab') {
                             setTimeout(() => {
                                 const form = inputEl.form || inputEl.closest('form');
@@ -1376,14 +1375,12 @@
                 }
             });
 
-            // Close on escape
             inputEl.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     dropdownEl.style.display = 'none';
                 }
             });
 
-            // Click outside closes dropdown
             document.addEventListener('click', (e) => {
                 if (!inputEl.contains(e.target) && !dropdownEl.contains(e.target)) {
                     dropdownEl.style.display = 'none';
@@ -1887,7 +1884,6 @@
             const n2 = name2Input.value.trim();
             const keyword = searchTextInput.value.trim();
 
-            // Save any speaker names typed to suggestions
             if (n1) addSpeakerSuggestion(n1);
             if (n2) addSpeakerSuggestion(n2);
 
@@ -2027,7 +2023,6 @@
             restoreIndicator.style.display = 'none';
             clearSavedState();
             switchTab('search', false);
-            // Hide any open suggestions
             suggestions1.style.display = 'none';
             suggestions2.style.display = 'none';
         }
@@ -2056,7 +2051,6 @@
                 if (saved.endDate !== undefined) endDateInput.value = saved.endDate || '';
                 if (saved.searchText !== undefined) searchTextInput.value = saved.searchText || '';
 
-                // Restore suggestions from saved names
                 if (saved.name1) addSpeakerSuggestion(saved.name1);
                 if (saved.name2) addSpeakerSuggestion(saved.name2);
 
@@ -2133,7 +2127,7 @@
         else mainFooter?.classList.remove('hide-footer');
 
         window.addEventListener('beforeunload', () => saveState());
-        console.log('⌕ log search ready · WhatsApp UI (no avatar, timestamp next to name, no "you") · speaker autocomplete');
+        console.log('⌕ log search ready · WhatsApp UI (no avatar, timestamp next to name, no "you") · speaker autocomplete · zoom fixed');
     </script>
 </body>
 </html>
