@@ -214,7 +214,8 @@
             width: 100%;
         }
 
-        input {
+        input[type="text"],
+        input[type="date"] {
             background: #f8fafc;
             border: 1px solid #e2e8f0;
             border-radius: 40px;
@@ -226,6 +227,11 @@
             transition: 0.15s;
             font-family: inherit;
             -webkit-text-size-adjust: 100%;
+        }
+
+        input[type="date"] {
+            appearance: auto;
+            -webkit-appearance: auto;
         }
 
         input:focus {
@@ -823,6 +829,9 @@
                 padding: 5px 14px;
                 font-size: 0.75rem;
             }
+            input[type="date"] {
+                font-size: 16px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -927,7 +936,8 @@
                 color: #93c5fd;
             }
 
-            input {
+            input[type="text"],
+            input[type="date"] {
                 background: #0f172a;
                 border-color: #334155;
                 color: #f1f5f9;
@@ -1158,11 +1168,11 @@
                         </div>
                         <div class="field-group">
                             <label>from</label>
-                            <input type="text" id="startDate" placeholder="dd/mm/yyyy" autocomplete="off">
+                            <input type="date" id="startDate">
                         </div>
                         <div class="field-group">
                             <label>to</label>
-                            <input type="text" id="endDate" placeholder="dd/mm/yyyy" autocomplete="off">
+                            <input type="date" id="endDate">
                         </div>
                         <div class="field-group">
                             <label>contains (search all)</label>
@@ -1182,7 +1192,7 @@
                         <span class="accent">↳</span> multi‑line merged &nbsp;·&nbsp; <span class="highlight">speaker 1 yellow</span>
                         &nbsp;·&nbsp; <span style="color:#00ff00;font-weight:600;">speaker 2 bright green</span>
                         &nbsp;·&nbsp; <span style="color:#2563eb;font-weight:600;">keyword blue</span>
-                        &nbsp;·&nbsp; <span style="color:#64748b;">💾 auto‑saved</span>
+                        &nbsp;·&nbsp; <span style="color:#64748b;">💾 auto‑saved · date pickers default to today</span>
                     </div>
                 </div>
             </div>
@@ -1239,6 +1249,36 @@
         const suggestions2 = document.getElementById('suggestions2');
         const SUGGESTIONS_KEY = 'speaker_suggestions';
         let speakerSuggestions = new Set();
+
+        // ── DATE HELPERS ──
+        function isoToDmy(iso) {
+            if (!iso) return '';
+            const parts = iso.split('-');
+            if (parts.length !== 3) return '';
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+
+        function dmyToIso(dmy) {
+            if (!dmy) return '';
+            const parts = dmy.split('/');
+            if (parts.length !== 3) return '';
+            const d = parseInt(parts[0], 10),
+                m = parseInt(parts[1], 10),
+                y = parseInt(parts[2], 10);
+            if (isNaN(d) || isNaN(m) || isNaN(y)) return '';
+            const iso = `${String(y).padStart(4, '0')}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            return iso;
+        }
+
+        function setDefaultDates() {
+            const today = new Date();
+            const y = today.getFullYear();
+            const m = String(today.getMonth() + 1).padStart(2, '0');
+            const d = String(today.getDate()).padStart(2, '0');
+            const iso = `${y}-${m}-${d}`;
+            if (!startDateInput.value) startDateInput.value = iso;
+            if (!endDateInput.value) endDateInput.value = iso;
+        }
 
         // ── SUGGESTIONS ──
         function loadSuggestions() {
@@ -1315,24 +1355,20 @@
         }
 
         function setupSuggestions(inputEl, dropdownEl) {
-            // Show on input (every keystroke)
             inputEl.addEventListener('input', function() {
                 renderSuggestions(inputEl, dropdownEl);
             });
 
-            // Also show on focus if there is a value
             inputEl.addEventListener('focus', function() {
                 if (this.value.trim()) {
                     renderSuggestions(inputEl, dropdownEl);
                 }
             });
 
-            // Hide on blur with a small delay to allow click on suggestion
             inputEl.addEventListener('blur', function() {
                 hideSuggestions(dropdownEl);
             });
 
-            // Keyboard navigation
             inputEl.addEventListener('keydown', function(e) {
                 const items = dropdownEl.querySelectorAll('.suggestion-item');
                 if (!items.length) return;
@@ -1381,7 +1417,6 @@
                 }
             });
 
-            // Click outside closes dropdown
             document.addEventListener('click', function(e) {
                 if (!inputEl.contains(e.target) && !dropdownEl.contains(e.target)) {
                     dropdownEl.style.display = 'none';
@@ -1405,13 +1440,16 @@
             try {
                 const selIds = [];
                 for (const m of selectedMessages) selIds.push(getMessageId(m));
+                // Convert date inputs (ISO) to dd/mm/yyyy for storage
+                const startVal = startDateInput.value ? isoToDmy(startDateInput.value) : '';
+                const endVal = endDateInput.value ? isoToDmy(endDateInput.value) : '';
                 const state = {
                     fileContent: rawFileContent || null,
                     fileName: fileNameSpan.textContent !== 'none' ? fileNameSpan.textContent : null,
                     name1: name1Input.value,
                     name2: name2Input.value,
-                    startDate: startDateInput.value,
-                    endDate: endDateInput.value,
+                    startDate: startVal,
+                    endDate: endVal,
                     searchText: searchTextInput.value,
                     selectedIds: selIds,
                     activeTab: document.querySelector('.tab-btn.active')?.dataset?.tab || 'search',
@@ -1894,15 +1932,18 @@
                 return;
             }
 
-            const fromRaw = startDateInput.value.trim();
-            const toRaw = endDateInput.value.trim();
+            // Get date values from date inputs (ISO) and convert to dd/mm/yyyy for parsing
+            const fromIso = startDateInput.value;
+            const toIso = endDateInput.value;
+            const fromDmy = fromIso ? isoToDmy(fromIso) : '';
+            const toDmy = toIso ? isoToDmy(toIso) : '';
 
             let fromMs = null,
                 toMs = null;
-            if (fromRaw) { fromMs = parseDateUniversal(fromRaw); if (fromMs === null) { resultsContainer.innerHTML =
-                        `<div class="empty-state">invalid from date · use dd/mm/yyyy</div>`; switchTab('results', false); return; } }
-            if (toRaw) { toMs = parseDateUniversal(toRaw); if (toMs === null) { resultsContainer.innerHTML =
-                        `<div class="empty-state">invalid to date · use dd/mm/yyyy</div>`; switchTab('results', false); return; } }
+            if (fromDmy) { fromMs = parseDateUniversal(fromDmy); if (fromMs === null) { resultsContainer.innerHTML =
+                        `<div class="empty-state">invalid from date · use date picker</div>`; switchTab('results', false); return; } }
+            if (toDmy) { toMs = parseDateUniversal(toDmy); if (toMs === null) { resultsContainer.innerHTML =
+                        `<div class="empty-state">invalid to date · use date picker</div>`; switchTab('results', false); return; } }
             if (fromMs !== null && toMs !== null && fromMs > toMs) { resultsContainer.innerHTML =
                     `<div class="empty-state">from date cannot be after to date</div>`; switchTab('results', false); return; }
 
@@ -2005,8 +2046,8 @@
             fileInput.value = '';
             name1Input.value = '';
             name2Input.value = '';
-            startDateInput.value = '';
-            endDateInput.value = '';
+            // Reset date inputs to today
+            setDefaultDates();
             searchTextInput.value = '';
             resultsContainer.innerHTML =
                 `<div class="empty-state">file cleared · upload a new log</div>`;
@@ -2048,8 +2089,15 @@
             try {
                 if (saved.name1 !== undefined) name1Input.value = saved.name1 || '';
                 if (saved.name2 !== undefined) name2Input.value = saved.name2 || '';
-                if (saved.startDate !== undefined) startDateInput.value = saved.startDate || '';
-                if (saved.endDate !== undefined) endDateInput.value = saved.endDate || '';
+                // Restore date inputs: saved is dd/mm/yyyy, convert to ISO
+                if (saved.startDate) {
+                    const iso = dmyToIso(saved.startDate);
+                    if (iso) startDateInput.value = iso;
+                }
+                if (saved.endDate) {
+                    const iso = dmyToIso(saved.endDate);
+                    if (iso) endDateInput.value = iso;
+                }
                 if (saved.searchText !== undefined) searchTextInput.value = saved.searchText || '';
 
                 if (saved.name1) addSpeakerSuggestion(saved.name1);
@@ -2116,6 +2164,9 @@
         setupSuggestions(name2Input, suggestions2);
 
         // ── INIT ──
+        // Set default dates (today) if not already set
+        setDefaultDates();
+
         resetSearchResults();
         updateDeleteButtonVisibility();
         const restored = restoreFromSaved();
@@ -2128,7 +2179,7 @@
         else mainFooter?.classList.remove('hide-footer');
 
         window.addEventListener('beforeunload', () => saveState());
-        console.log('⌕ log search ready · speaker autocomplete now responds to every keystroke');
+        console.log('⌕ log search ready · date pickers added, default to today');
     </script>
 </body>
 </html>
