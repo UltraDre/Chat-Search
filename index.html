@@ -339,6 +339,75 @@
             text-align: center;
         }
 
+        /* ── Names tab ── */
+        .names-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 0.9rem;
+            max-height: 460px;
+            overflow-y: auto;
+            padding-right: 2px;
+        }
+
+        .name-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.7rem;
+            background: #f8fafc;
+            border: 1px solid #eef2f6;
+            border-radius: 40px;
+            padding: 5px 6px 5px 16px;
+            font-size: 0.8rem;
+            color: #1e293b;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+        }
+
+        .name-row:hover {
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+        }
+
+        .name-row .name-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .name-delete-btn {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            border-radius: 50%;
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            color: #991b1b;
+            font-size: 0.75rem;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .name-delete-btn:hover {
+            background: #fecaca;
+            border-color: #f87171;
+            transform: translateY(-1px);
+        }
+
+        .names-empty {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #94a3b8;
+            font-size: 0.75rem;
+            line-height: 1.8;
+        }
+
         /* Dark mode suggestions */
         @media (prefers-color-scheme: dark) {
             .suggestions-dropdown {
@@ -837,6 +906,9 @@
             input[type="date"] {
                 font-size: 16px;
             }
+            .names-list {
+                max-height: 340px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -987,6 +1059,30 @@
                 color: #34d399;
             }
 
+            /* Dark: names tab */
+            .name-row {
+                background: #0f172a;
+                border-color: #2d3a5e;
+                color: #e2e8f0;
+            }
+            .name-row:hover {
+                background: #16213a;
+                border-color: #3b4d75;
+            }
+            .name-delete-btn {
+                background: #4c1d2b;
+                border-color: #7f1d3a;
+                color: #fca5a5;
+            }
+            .name-delete-btn:hover {
+                background: #7f1d3a;
+                border-color: #b91c3a;
+                color: #fff;
+            }
+            .names-empty {
+                color: #64748b;
+            }
+
             /* ── Dark: Results ── */
             .results-raw {
                 background: #0f1923;
@@ -1134,6 +1230,7 @@
         <div class="tab-bar">
             <button class="tab-btn active" data-tab="search">Search</button>
             <button class="tab-btn" data-tab="results">Results</button>
+            <button class="tab-btn" data-tab="names">Names</button>
         </div>
 
         <div class="tab-panels">
@@ -1214,6 +1311,20 @@
                     </div>
                 </div>
             </div>
+
+            <!-- TAB 3: NAMES -->
+            <div class="tab-panel" id="namesPanel">
+                <div class="control-card">
+                    <div class="flex-between">
+                        <div>
+                            <h1>👤 names</h1>
+                            <div class="sub">saved speakers · tap ✕ to remove</div>
+                        </div>
+                        <div class="stats-badge" id="namesCount">0 names</div>
+                    </div>
+                    <div class="names-list" id="namesList"></div>
+                </div>
+            </div>
         </div>
 
         <footer id="mainFooter">dual format · continuation lines · speaker 1 <span style="color:#facc15;font-weight:600;">yellow</span> · speaker 2 <span style="color:#00ff00;font-weight:600;">bright green</span> · keyword <span style="color:#2563eb;font-weight:600;">blue</span> · select &amp; delete · auto‑persist</footer>
@@ -1248,6 +1359,8 @@
         const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
         const resultCountBadge = document.getElementById('resultCountBadge');
         const restoreIndicator = document.getElementById('restoreIndicator');
+        const namesList = document.getElementById('namesList');
+        const namesCount = document.getElementById('namesCount');
 
         // Suggestions
         const suggestions1 = document.getElementById('suggestions1');
@@ -1304,9 +1417,66 @@
 
         function addSpeakerSuggestion(name) {
             if (name && name.trim()) {
-                speakerSuggestions.add(name.trim());
-                saveSuggestions();
+                const clean = name.trim();
+                const before = speakerSuggestions.size;
+                speakerSuggestions.add(clean);
+                if (speakerSuggestions.size !== before) {
+                    saveSuggestions();
+                    renderNamesList();
+                }
             }
+        }
+
+        function removeSpeakerSuggestion(name) {
+            if (!speakerSuggestions.has(name)) return;
+            speakerSuggestions.delete(name);
+            saveSuggestions();
+            renderNamesList();
+            // keep dropdowns consistent
+            suggestions1.style.display = 'none';
+            suggestions2.style.display = 'none';
+        }
+
+        // ── NAMES TAB RENDER ──
+        function renderNamesList() {
+            if (!namesList) return;
+            const names = [...speakerSuggestions].sort((a, b) => a.localeCompare(b));
+
+            if (namesCount) {
+                namesCount.textContent = `${names.length} name${names.length !== 1 ? 's' : ''}`;
+            }
+
+            if (!names.length) {
+                namesList.innerHTML =
+                    `<div class="names-empty">no saved names yet<br><span style="color:#94a3b8;">names you search for appear here automatically</span></div>`;
+                return;
+            }
+
+            const frag = document.createDocumentFragment();
+            names.forEach(name => {
+                const row = document.createElement('div');
+                row.className = 'name-row';
+
+                const text = document.createElement('span');
+                text.className = 'name-text';
+                text.textContent = name;
+                text.title = name;
+
+                const del = document.createElement('button');
+                del.className = 'name-delete-btn';
+                del.type = 'button';
+                del.title = `remove ${name}`;
+                del.setAttribute('aria-label', `remove ${name}`);
+                del.textContent = '✕';
+                del.addEventListener('click', () => removeSpeakerSuggestion(name));
+
+                row.appendChild(text);
+                row.appendChild(del);
+                frag.appendChild(row);
+            });
+
+            namesList.innerHTML = '';
+            namesList.appendChild(frag);
         }
 
         function getMatchingSuggestions(input) {
@@ -1485,6 +1655,7 @@
             else mainFooter?.classList.remove('hide-footer');
 
             if (tabId === 'results') updateDeleteButtonVisibility();
+            if (tabId === 'names') renderNamesList();
             if (save) saveState();
         }
 
@@ -2173,8 +2344,10 @@
         setDefaultDates();
 
         resetSearchResults();
+        renderNamesList();
         updateDeleteButtonVisibility();
         const restored = restoreFromSaved();
+        renderNamesList();
         if (!restored) {
             resultsContainer.innerHTML =
                 `<div class="empty-state">upload a log · search → results appear here<br><span style="color:#94a3b8;">select messages with checkboxes · delete selected · auto‑saved</span></div>`;
@@ -2184,7 +2357,7 @@
         else mainFooter?.classList.remove('hide-footer');
 
         window.addEventListener('beforeunload', () => saveState());
-        console.log('⌕ log search ready · date pickers added, default to today');
+        console.log('⌕ log search ready · date pickers added, default to today · names tab added');
     </script>
 </body>
 </html>
