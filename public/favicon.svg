@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="log search">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1e293b"/>
+      <stop offset="1" stop-color="#0b1120"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- chat bubble: body + tail merge into one silhouette -->
+  <g fill="#f8fafc">
+    <rect x="92" y="128" width="328" height="186" rx="54"/>
+    <path d="M168 296h74l-58 96-16-96z"/>
+  </g>
+
+  <!-- magnifier -->
+  <circle cx="220" cy="206" r="46" fill="none" stroke="#0f172a" stroke-width="24"/>
+  <path d="M254 240l46 46" stroke="#0f172a" stroke-width="24" stroke-linecap="round"/>
+
+  <!-- youngest-message accent -->
+  <circle cx="336" cy="168" r="15" fill="#facc15"/>
+</svg>
