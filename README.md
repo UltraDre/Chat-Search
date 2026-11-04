@@ -86,11 +86,12 @@ npm run icons       # re-rasterise public/favicon.svg into the PWA icon set
 - **Filters**: speaker 1 (required-ish), optional speaker 2, a date range, and a
   case-insensitive keyword that searches every message body.
 - **Speaker autocomplete** with ↑/↓/Enter/Esc support, fed by the saved names.
-- **Date range auto-fits to the uploaded log** so an older export doesn't come
-  back empty (the pickers used to start on "today → today").
-- **Auto-save**: the log text, filters, selections and active tab are restored on
-  the next visit (`localStorage`), with a `↻ restored` badge and graceful
-  fallback if the browser's storage quota is exceeded.
+- **Date range** starts at today for both fields on each visit and file selection;
+  choose a different range to search older messages.
+- **Auto-save**: the log text, names, keyword, selections and active tab are
+  restored on the next visit (`localStorage`), with a `↻ restored` badge and
+  graceful fallback if the browser's storage quota is exceeded. The date range
+  resets to today.
 
 ### Results tab
 - WhatsApp-style bubbles: speaker 1 on the right, everyone else on the left,
