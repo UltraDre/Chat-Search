@@ -13,7 +13,9 @@
     "typecheck": "tsc --noEmit",
     "icons": "node scripts/render-icons.mjs",
     "verify": "node scripts/verify-boot.mjs",
-    "check": "npm run typecheck && npm test && npm run build && npm run verify"
+    "check": "npm run typecheck && npm test && npm run build && npm run publish:root && npm run verify",
+    "publish:root": "node scripts/publish-root.mjs",
+    "serve": "node scripts/serve-root.mjs"
   },
   "devDependencies": {
     "jsdom": "^30.1.3",

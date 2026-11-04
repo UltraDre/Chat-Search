@@ -12,27 +12,34 @@
     <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0b1120" media="(prefers-color-scheme: dark)" />
     <meta name="color-scheme" content="light dark" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
-    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+
+    <!--
+      Source entry point used by the dev server and as the Vite build input.
+      The repo-root index.html is generated from the build
+      (`npm run build && npm run publish:root`) and must not be edited by hand.
+    -->
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="log search" />
-    <link rel="stylesheet" href="/src/styles.css" />
-  </head>
+    <script type="module" crossorigin src="./assets/app.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/style.css">
+  <link rel="manifest" href="./manifest.webmanifest"></head>
   <body>
     <div id="app">
-      <!-- Replaced by the app at boot. If the module never runs (offline, stale
-           cache, script error), this skeleton keeps the page from being blank. -->
+      <!-- Replaced by the app at boot. If the bundle never runs (stale build,
+           boot error), this keeps the page readable instead of blank. -->
       <div class="boot-fallback" id="bootFallback">
         <p class="boot-title">⌕ log search</p>
         <p class="boot-text">Loading…</p>
-        <p class="boot-hint">If this stays, reload the page — the app scripts didn’t run.</p>
+        <p class="boot-hint">If this stays, the app bundle didn’t run. Reload, or rebuild with <code>npm run build &amp;&amp; npm run publish:root</code>.</p>
         <button type="button" onclick="location.reload()">reload</button>
       </div>
     </div>
     <noscript>This app needs JavaScript to parse chat logs locally in your browser.</noscript>
-    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

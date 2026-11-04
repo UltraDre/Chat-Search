@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- maximum-scale/user-scalable keep phones from zooming when a field is focused. -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>log · search</title>
+    <meta name="description" content="Search WhatsApp-style chat logs by speaker, date and keyword. Offline, private, installable." />
+    <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b1120" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
+
+    <!--
+      Source entry point used by the dev server and as the Vite build input.
+      The repo-root index.html is generated from the build
+      (`npm run build && npm run publish:root`) and must not be edited by hand.
+    -->
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="../src/styles.css" />
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="log search" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Replaced by the app at boot. If the bundle never runs (stale build,
+           boot error), this keeps the page readable instead of blank. -->
+      <div class="boot-fallback" id="bootFallback">
+        <p class="boot-title">⌕ log search</p>
+        <p class="boot-text">Loading…</p>
+        <p class="boot-hint">If this stays, the app bundle didn’t run. Reload, or rebuild with <code>npm run build &amp;&amp; npm run publish:root</code>.</p>
+        <button type="button" onclick="location.reload()">reload</button>
+      </div>
+    </div>
+    <noscript>This app needs JavaScript to parse chat logs locally in your browser.</noscript>
+    <script type="module" src="../src/main.ts"></script>
+  </body>
+</html>
