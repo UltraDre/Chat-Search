@@ -22,7 +22,16 @@
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <!-- Replaced by the app at boot. If the module never runs (offline, stale
+           cache, script error), this skeleton keeps the page from being blank. -->
+      <div class="boot-fallback" id="bootFallback">
+        <p class="boot-title">⌕ log search</p>
+        <p class="boot-text">Loading…</p>
+        <p class="boot-hint">If this stays, reload the page — the app scripts didn’t run.</p>
+        <button type="button" onclick="location.reload()">reload</button>
+      </div>
+    </div>
     <noscript>This app needs JavaScript to parse chat logs locally in your browser.</noscript>
     <script type="module" src="/src/main.ts"></script>
   </body>

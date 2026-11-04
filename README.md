@@ -40,10 +40,18 @@ npm run dev        # http://localhost:5173  (bound to 0.0.0.0 for previews)
 ```bash
 npm run build      # typecheck + production build into dist/ (with sw.js)
 npm run preview    # serve dist/ locally to test the service worker
-npm test           # 46 unit + DOM tests
+npm test           # 49 unit + DOM tests
+npm run verify     # boots the built bundle in jsdom (blank-page guard)
+npm run check      # typecheck + tests + build + boot verification
 npm run typecheck  # tsc --noEmit
 npm run icons      # re-rasterise public/favicon.svg into the PWA icon set
 ```
+
+> **No blank pages.** `index.html` ships a "Loading…" skeleton inside `#app` that
+> the app replaces on boot, `src/boot.ts` turns any boot-time error into a readable
+> message, and `npm run verify` executes the production bundle in a real DOM and
+> asserts the shell rendered. If you only see the skeleton or an error card, the
+> page loaded but its JS did not run — reload, then check the console.
 
 `public/sample-chat.txt` is a small log you can load to try the app.
 

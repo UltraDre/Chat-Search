@@ -1,7 +1,6 @@
 import './styles.css';
 import { createApp } from './app';
+import { boot, watchBootErrors } from './boot';
 
-const root = document.getElementById('app');
-if (!root) throw new Error('#app root missing');
-
-createApp(root);
+watchBootErrors();
+boot(createApp);
