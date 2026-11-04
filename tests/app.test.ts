@@ -195,6 +195,43 @@ describe('names tab', () => {
     expect(stored).toHaveLength(1);
   });
 
+  it('preserves spaces and special characters in searched suggestions and picks', () => {
+    boot();
+    loadLog();
+    const input = $<HTMLInputElement>('name1');
+    input.value = 'adex ea';
+    $('searchBtn').click();
+    expect(JSON.parse(localStorage.getItem('log-search:names')!)).toContain('adex ea');
+
+    // Reload the saved names, then use the suggestion in either field.
+    resetState();
+    document.body.innerHTML = '<div id="app"></div>';
+    createApp(document.getElementById('app')!);
+    const second = $<HTMLInputElement>('name2');
+    second.value = 'a';
+    second.dispatchEvent(new Event('input', { bubbles: true }));
+    const item = document.querySelector<HTMLElement>('#suggestions2 .suggestion-item')!;
+    expect(item.textContent).toBe('adex ea');
+    item.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    expect(second.value).toBe('adex ea');
+    expect(JSON.parse(localStorage.getItem('log-search:names')!)).toEqual(['adex ea']);
+  });
+
+  it('renders literal percent signs, unicode and HTML-like text safely', () => {
+    localStorage.setItem('log-search:names', JSON.stringify(['A 100% <img src=x> é', 'A%20literal']));
+    resetState();
+    boot();
+    const input = $<HTMLInputElement>('name1');
+    input.value = 'A';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    const items = [...document.querySelectorAll<HTMLElement>('#suggestions1 .suggestion-item')];
+    expect(items.map((item) => item.textContent)).toEqual(['A 100% <img src=x> é', 'A%20literal']);
+    expect($('suggestions1').querySelector('img')).toBeNull();
+    expect(items[0].querySelector('.highlight')?.textContent).toBe('A');
+    items[0].dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    expect(input.value).toBe('A 100% <img src=x> é');
+  });
+
   it('offers prefix suggestions while typing', () => {
     boot();
     localStorage.setItem('log-search:names', JSON.stringify(['Samuel', 'Samantha', 'Ada']));

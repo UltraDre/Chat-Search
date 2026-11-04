@@ -48,6 +48,12 @@ describe('published root build', () => {
     expect(html).toMatch(/src="\.\/assets\/app\.js"/);
   });
 
+  it('revisions stable asset filenames so offline clients receive updates', () => {
+    const sw = read('sw.js');
+    expect(sw).toMatch(/url:"assets\/app\.js",revision:"[a-f0-9]+"/);
+    expect(sw).toMatch(/url:"assets\/style\.css",revision:"[a-f0-9]+"/);
+  });
+
   it('keeps the offline precache list pointing at real files', () => {
     const sw = read('sw.js');
     const entries = [...sw.matchAll(/url:"([^"]+)"/g)].map((m) => m[1]);

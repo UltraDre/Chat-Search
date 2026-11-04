@@ -48,15 +48,23 @@ export function attachSuggestions({ input, dropdown, getNames, onPick, onSubmit 
 
     activeIndex = -1;
     const lower = value.toLowerCase();
-    dropdown.innerHTML = found
-      .map((name) => {
-        const at = name.toLowerCase().indexOf(lower);
-        const before = escape(name.slice(0, at));
-        const hit = escape(name.slice(at, at + value.length));
-        const after = escape(name.slice(at + value.length));
-        return `<div class="suggestion-item" role="option">${before}<span class="highlight">${hit}</span>${after}</div>`;
-      })
-      .join('');
+    const fragment = document.createDocumentFragment();
+    for (const name of found) {
+      const at = name.toLowerCase().indexOf(lower);
+      const item = document.createElement('div');
+      item.className = 'suggestion-item';
+      item.setAttribute('role', 'option');
+      const hit = document.createElement('span');
+      hit.className = 'highlight';
+      hit.textContent = name.slice(at, at + value.length);
+      item.append(
+        document.createTextNode(name.slice(0, at)),
+        hit,
+        document.createTextNode(name.slice(at + value.length)),
+      );
+      fragment.appendChild(item);
+    }
+    dropdown.replaceChildren(fragment);
     dropdown.style.display = 'block';
   }
 
