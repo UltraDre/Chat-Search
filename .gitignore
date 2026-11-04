@@ -1,7 +1,7 @@
 # dependencies
 node_modules/
 
-# build output
+# intermediate build output (the published copy at the repo root IS tracked)
 dist/
 dist-ssr/
 *.local

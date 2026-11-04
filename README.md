@@ -34,24 +34,42 @@ No React/Vue/Svelte: the whole app is a handful of screens, and the original
 
 ```bash
 npm install
-npm run dev        # http://localhost:5173  (bound to 0.0.0.0 for previews)
+npm run dev        # http://localhost:5173  (dev server, hot reload)
+npm run serve      # http://localhost:8080  (serves the already-built root, no build)
+```
+
+**The repo root is directly servable.** `index.html`, `assets/`, `icons/`, `sw.js`
+and `manifest.webmanifest` at the root are a complete production build with
+relative paths, so the app runs from any static server — a plain file host, a
+sandbox preview, GitHub Pages — with no Node, no install and no build step.
+
+After changing anything under `src/` or `web/`, refresh that copy:
+
+```bash
+npm run publish:root    # build + copy the result to the repo root
+# or, all at once:
+npm run check           # typecheck + tests + build + publish + boot verification
 ```
 
 ```bash
-npm run build      # typecheck + production build into dist/ (with sw.js)
-npm run preview    # serve dist/ locally to test the service worker
-npm test           # 49 unit + DOM tests
-npm run verify     # boots the built bundle in jsdom (blank-page guard)
-npm run check      # typecheck + tests + build + boot verification
-npm run typecheck  # tsc --noEmit
-npm run icons      # re-rasterise public/favicon.svg into the PWA icon set
+npm run build       # typecheck + production build into dist/ (with sw.js)
+npm run preview     # serve dist/ locally to test the service worker
+npm test            # 54 unit + DOM tests
+npm run verify      # boots the published root build in jsdom (blank-page guard)
+npm run publish:root# build, then copy dist/ to the repo root for static hosting
+npm run serve       # dependency-free static server for the root build
+npm run check       # typecheck + tests + build + publish + boot verification
+npm run typecheck   # tsc --noEmit
+npm run icons       # re-rasterise public/favicon.svg into the PWA icon set
 ```
 
-> **No blank pages.** `index.html` ships a "Loading…" skeleton inside `#app` that
-> the app replaces on boot, `src/boot.ts` turns any boot-time error into a readable
-> message, and `npm run verify` executes the production bundle in a real DOM and
-> asserts the shell rendered. If you only see the skeleton or an error card, the
-> page loaded but its JS did not run — reload, then check the console.
+> **No blank pages.** The served `index.html` ships a "Loading…" card inside `#app`
+> that the app replaces on boot, `src/boot.ts` turns any boot-time error into a
+> readable message, and `npm run verify` executes the published bundle in a real
+> DOM and asserts the shell rendered. If you see the Loading card, the page loaded
+> but its JS did not run — the root build is stale (`npm run publish:root`) or the
+> host is not serving `assets/`. `tests/served.test.ts` also fails the suite if the
+> published root drifts from a working build.
 
 `public/sample-chat.txt` is a small log you can load to try the app.
 
@@ -131,7 +149,11 @@ then go offline in DevTools and reload.
 ## Project structure
 
 ```
-index.html              app shell + PWA meta (viewport, manifest, icons)
+web/index.html          source entry (dev server + Vite build input)
+index.html              PUBLISHED build output — generated, do not edit by hand
+assets/                 PUBLISHED app.js + style.css (generated)
+icons/ sw.js manifest.webmanifest   PUBLISHED PWA assets (generated)
+public/                 source assets copied into the build
 src/
   main.ts               boot
   app.ts                wires the tabs, search, file loading, restore
@@ -151,9 +173,13 @@ src/
     suggestions.ts      autocomplete behaviour
     results.ts          bubble/divider rendering
     names.ts            saved-speaker list
-public/
-  favicon.svg icons/ sample-chat.txt
-tests/                  parser, search, highlight, date + full-app DOM tests
+scripts/
+  publish-root.mjs      copies dist/ to the repo root with relative URLs
+  serve-root.mjs        dependency-free static server for the root build
+  verify-boot.mjs       boots the published build in jsdom
+  render-icons.mjs      rasterises the icon SVG
+tests/                  parser, search, highlight, dates, full-app DOM,
+                        boot guard, and published-root integrity tests
 ```
 
 ## Data & privacy

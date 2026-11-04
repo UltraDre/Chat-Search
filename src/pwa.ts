@@ -42,8 +42,10 @@ function registerServiceWorker(): void {
   if (import.meta.env.DEV) return;
 
   window.addEventListener('load', () => {
+    // Relative so the app also works when served from a subpath or a preview proxy.
+    const base = import.meta.env.BASE_URL || './';
     navigator.serviceWorker
-      .register('/sw.js', { scope: '/' })
+      .register(`${base}sw.js`)
       .then(() => {
         // First visit only: let the user know the app now works offline.
         if (!sessionStorage.getItem('log-search:offline-hint')) {
@@ -52,7 +54,8 @@ function registerServiceWorker(): void {
         }
       })
       .catch(() => {
-        /* offline support is a bonus, never a blocker */
+        // Offline support is a bonus, never a blocker: the app already runs.
+        // (Most common cause: served over plain http, or no sw.js published.)
       });
   });
 
