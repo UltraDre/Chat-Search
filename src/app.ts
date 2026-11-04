@@ -5,7 +5,7 @@ import { renderEmpty, renderResults, syncSelection } from './ui/results';
 import { renderNames } from './ui/names';
 import { parseLog } from './lib/parser';
 import { searchMessages } from './lib/search';
-import { dmyToIso, isoToTimestamp, timestampToIso, todayIso } from './lib/dates';
+import { isoToTimestamp, todayIso } from './lib/dates';
 import { loadState } from './lib/storage';
 import type { TabId } from './lib/types';
 import {
@@ -68,28 +68,6 @@ export function createApp(root: HTMLElement): void {
     searchText: el.searchText.value,
   });
 
-  /**
-   * Which picker the user last touched. Once they pick a date by hand we stop
-   * auto-fitting the range to the log.
-   */
-  let lastDateTouched: 'start' | 'end' | null = null;
-
-  /**
-   * The log usually predates today, so a "today → today" default would return
-   * nothing. On upload, fit the range to the whole file instead.
-   */
-  function fitRangeToLog(): void {
-    if (!state.messages.length || lastDateTouched) return;
-    let oldest = Infinity;
-    let newest = -Infinity;
-    for (const msg of state.messages) {
-      if (msg.dayTimestamp < oldest) oldest = msg.dayTimestamp;
-      if (msg.dayTimestamp > newest) newest = msg.dayTimestamp;
-    }
-    el.startDate.value = timestampToIso(oldest);
-    el.endDate.value = timestampToIso(newest);
-  }
-
   /* ── persistence ────────────────────────────────────────────────────── */
 
   let saveTimer: ReturnType<typeof setTimeout> | undefined;
@@ -127,11 +105,11 @@ export function createApp(root: HTMLElement): void {
 
   /* ── header / badges ────────────────────────────────────────────────── */
 
-  /** Fresh install: last ~year, so any recent log matches out of the box. */
+  /** Start each visit and file selection with the current local day. */
   function defaultRange(): void {
-    const now = new Date();
-    el.startDate.value = todayIso(new Date(now.getFullYear() - 1, now.getMonth(), now.getDate()));
-    el.endDate.value = todayIso(now);
+    const today = todayIso();
+    el.startDate.value = today;
+    el.endDate.value = today;
   }
 
   function updateStats(): void {
@@ -264,13 +242,13 @@ export function createApp(root: HTMLElement): void {
   /* ── file handling ──────────────────────────────────────────────────── */
 
   function loadFile(file: File): void {
+    defaultRange();
     el.fileName.textContent = file.name;
     const reader = new FileReader();
     reader.onload = () => {
       const content = String(reader.result ?? '');
       const { messages, rejected } = parseLog(content);
       setFile(file.name, content, messages);
-      fitRangeToLog();
       el.fileName.textContent = file.name;
       el.restoreBadge.style.display = 'inline-block';
       updateStats();
@@ -315,7 +293,6 @@ export function createApp(root: HTMLElement): void {
     el.name1.value = '';
     el.name2.value = '';
     el.searchText.value = '';
-    lastDateTouched = null;
     defaultRange();
     suggestions1.style.display = 'none';
     suggestions2.style.display = 'none';
@@ -356,14 +333,6 @@ export function createApp(root: HTMLElement): void {
       if (saved.name2) {
         el.name2.value = saved.name2;
         rememberSpeaker(saved.name2);
-      }
-      if (saved.startDate) {
-        const iso = dmyToIso(saved.startDate);
-        if (iso) el.startDate.value = iso;
-      }
-      if (saved.endDate) {
-        const iso = dmyToIso(saved.endDate);
-        if (iso) el.endDate.value = iso;
       }
       el.searchText.value = saved.searchText ?? '';
 
@@ -446,7 +415,6 @@ export function createApp(root: HTMLElement): void {
     [el.searchText, 'keyword'],
   ] as const) {
     on(field, 'input', () => {
-      if (key === 'start' || key === 'end') lastDateTouched = key;
       save();
       if (key !== 'start' && key !== 'end') repaintHighlights();
     });

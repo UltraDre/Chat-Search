@@ -2,6 +2,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../src/app';
 import { parseLog } from '../src/lib/parser';
+import { todayIso } from '../src/lib/dates';
 import { resetState, setFile } from '../src/state';
 
 const LOG = [
@@ -21,8 +22,7 @@ function boot() {
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
 function loadLog() {
-  // Mirrors what loadFile() does once the FileReader resolves, including the
-  // range auto-fit (the fixture log predates today).
+  // Load a fixture directly and select its date range for search tests.
   const { messages } = parseLog(LOG);
   setFile('chat.txt', LOG, messages);
   $('fileName').textContent = 'chat.txt';
@@ -51,13 +51,30 @@ describe('app shell', () => {
     expect($('resultsPanel').classList.contains('active-panel')).toBe(false);
   });
 
-  it('defaults the range to the last year and ends today', () => {
+  it('defaults both dates to the current local day', () => {
     boot();
-    const today = new Date();
-    const iso = (d: Date) =>
-      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    expect($<HTMLInputElement>('endDate').value).toBe(iso(today));
-    expect($<HTMLInputElement>('startDate').value).toBe(iso(new Date(today.getFullYear() - 1, today.getMonth(), today.getDate())));
+    expect($<HTMLInputElement>('startDate').value).toBe(todayIso());
+    expect($<HTMLInputElement>('endDate').value).toBe(todayIso());
+  });
+
+  it('keeps today as the range after selecting a log and allows editing it', async () => {
+    boot();
+    const input = $<HTMLInputElement>('fileInput');
+    Object.defineProperty(input, 'files', { configurable: true, value: [new File([LOG], 'old-chat.txt', { type: 'text/plain' })] });
+    setDate('startDate', '2020-01-01');
+    setDate('endDate', '2020-02-01');
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    expect($<HTMLInputElement>('startDate').value).toBe(todayIso());
+    expect($<HTMLInputElement>('endDate').value).toBe(todayIso());
+    await vi.waitFor(() => expect($('parseStats').textContent).toBe('4 msgs'));
+    expect($<HTMLInputElement>('startDate').value).toBe(todayIso());
+    expect($<HTMLInputElement>('endDate').value).toBe(todayIso());
+
+    setDate('startDate', '2025-07-15');
+    setDate('endDate', '2025-07-17');
+    $<HTMLInputElement>('name1').value = 'Samuel';
+    $('searchBtn').click();
+    expect($('resultCountBadge').textContent).toBe('2 messages');
   });
 
   it('shows the empty results state and zero count', () => {
@@ -255,16 +272,16 @@ describe('names tab', () => {
 });
 
 describe('persistence', () => {
-  it('restores file, filters and tab after a reload', () => {
+  it('restores file and filters but resets dates to today after a reload', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 10, 4, 12));
     boot();
     loadLog();
     $<HTMLInputElement>('name1').value = 'Samuel';
     $('searchBtn').click();
 
     // Flush the debounced save, then rebuild the app like a fresh page load.
-    vi.useFakeTimers();
     window.dispatchEvent(new Event('beforeunload'));
-    vi.useRealTimers();
 
     const raw = localStorage.getItem('log-search:state');
     expect(raw).toBeTruthy();
@@ -273,10 +290,13 @@ describe('persistence', () => {
     createApp(document.getElementById('app')!);
 
     expect($<HTMLInputElement>('name1').value).toBe('Samuel');
-    expect($('resultCountBadge').textContent).toBe('2 messages');
+    expect($('resultCountBadge').textContent).toBe('0 messages');
+    expect($<HTMLInputElement>('startDate').value).toBe('2026-11-04');
+    expect($<HTMLInputElement>('endDate').value).toBe('2026-11-04');
     expect($('resultsPanel').classList.contains('active-panel')).toBe(true);
     expect($('restoreIndicator').style.display).toBe('inline-block');
     expect($('fileName').textContent).toBe('chat.txt');
+    vi.useRealTimers();
   });
 
   it('clears everything when the file is cleared', () => {
@@ -289,6 +309,8 @@ describe('persistence', () => {
     expect($('fileName').textContent).toBe('none');
     expect($('parseStats').textContent).toBe('no file');
     expect($<HTMLInputElement>('name1').value).toBe('');
+    expect($<HTMLInputElement>('startDate').value).toBe(todayIso());
+    expect($<HTMLInputElement>('endDate').value).toBe(todayIso());
     expect($('searchPanel').classList.contains('active-panel')).toBe(true);
     expect(localStorage.getItem('log-search:state')).toBeNull();
   });
