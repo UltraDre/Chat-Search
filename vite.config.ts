@@ -81,6 +81,10 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,png,svg,webmanifest,woff2,txt}'],
+        // Published asset filenames are stable, so Workbox must revision their
+        // contents to deliver updates to existing offline installations.
+        dontCacheBustURLsMatching: /$^/,
+
         navigateFallback: 'index.html',
         cleanupOutdatedCaches: true,
         clientsClaim: true,
