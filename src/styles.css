@@ -1288,6 +1288,66 @@ footer.hide-footer {
     }
 }
 
+/* Shown only until the app mounts (or if the scripts never run), so the page is
+   never blank. Removed with the rest of #app's contents on boot. */
+.boot-fallback {
+    max-width: 22rem;
+    margin: 18vh auto 0;
+    padding: 1.6rem 1.8rem;
+    text-align: center;
+    background: #ffffff;
+    border: 1px solid #eef2f6;
+    border-radius: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.02);
+    color: #0f172a;
+    line-height: 1.6;
+}
+
+.boot-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    margin-bottom: 0.35rem;
+}
+
+.boot-text {
+    font-size: 0.8rem;
+    color: #475569;
+}
+
+.boot-hint {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    margin-top: 0.35rem;
+}
+
+.boot-fallback button {
+    margin-top: 1rem;
+    background: #0f172a;
+    border-color: #0f172a;
+    color: #fff;
+    padding: 6px 20px;
+}
+
+@media (prefers-color-scheme: dark) {
+    .boot-fallback {
+        background: #1e293b;
+        border-color: #2d3a5e;
+        color: #e2e8f0;
+    }
+    .boot-text {
+        color: #cbd5e1;
+    }
+    .boot-hint {
+        color: #64748b;
+    }
+    .boot-fallback button {
+        background: #facc15;
+        border-color: #facc15;
+        color: #0f172a;
+    }
+}
+
 /* =====================================================================
    PWA / touch refinements
    ===================================================================== */
